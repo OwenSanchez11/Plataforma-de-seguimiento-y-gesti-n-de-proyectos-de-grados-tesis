@@ -61,10 +61,10 @@ class RolUsuarioRepository:
         conn = self.db.getConnection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM rol_usuario WHERE id_rol_usuario = %s RETURNING id_rol;", (id_rol_usuario,))
-        eliminaado = cursor.fetchone()
+        eliminado = cursor.fetchone()
         conn.commit()
         conn.close()
-        return eliminaado is not None      
+        return eliminado is not None      
         
         
     
