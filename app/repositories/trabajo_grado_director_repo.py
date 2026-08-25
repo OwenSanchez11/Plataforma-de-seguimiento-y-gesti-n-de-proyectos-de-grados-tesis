@@ -46,10 +46,10 @@ class TrabajoGradoDirectorRepository:
         conn = self.db.getConnection()
         cursor = conn.cursor()
         query= """
-            UPDATE trabajo_grado_director SET id_trabajo_grado = %s, id_profesor = %s WHERE id_trabajo_grado_director = %s RETURNING id_trabajo_grado_director;
+            UPDATE trabajo_grado_director SET id_trabajo_grado = %s, id_profesor = %s, tipo_director = %s WHERE id_trabajo_grado_director = %s RETURNING id_trabajo_grado_director;
         """
                 
-        cursor.execute(query, (trabajo_grado_director.id_trabajo_grado, trabajo_grado_director.id_profesor, id_trabajo_grado_director))
+        cursor.execute(query, (trabajo_grado_director.id_trabajo_grado, trabajo_grado_director.id_profesor, trabajo_grado_director.tipo_director,id_trabajo_grado_director))
                 
         trabajoGradoPorDirectorActualizado = cursor.fetchone()
         conn.commit()

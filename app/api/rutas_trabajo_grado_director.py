@@ -3,7 +3,7 @@ from app.models.trabajo_grado_director import Crear_trabajo_grado_director
 from app.models.trabajo_grado_director import Actualizar_trabajo_grado_director
 from app.repositories.trabajo_grado_director_repo import TrabajoGradoDirectorRepository
 
-router = APIRouter(prefix="/trabajoGradoDirector", tags=["Gestión de los trabajos de grados asignados a los profesores"])
+router = APIRouter(prefix="/trabajo_grado_director", tags=["Gestión de los trabajos de grados asignados a los profesores"])
 repo = TrabajoGradoDirectorRepository()
 
 @router.get("/")

@@ -12,6 +12,11 @@ class Usuario(BaseModel):
 
     
 class UsuarioCrear(BaseModel):
+    username: str 
+    nombre: str
+    apellido: str
+    email: str
+    documento: str
     contraseña: str
     
 class UsuarioRespuesta(BaseModel):

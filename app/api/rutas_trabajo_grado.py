@@ -4,7 +4,7 @@ from app.models.trabajo_grado import ActualizarTrabajoGrado
 from app.repositories.trabajo_grado_repo import TrabajoGradoRepository
 from app.models.trabajo_grado import CrearTrabajoGrado
 
-router = APIRouter(prefix="/trabajoGrado", tags=["Gestión de los trabajos de grado del sistema"])
+router = APIRouter(prefix="/trabajo_grado", tags=["Gestión de los trabajos de grado del sistema"])
 repo = TrabajoGradoRepository()
 
 

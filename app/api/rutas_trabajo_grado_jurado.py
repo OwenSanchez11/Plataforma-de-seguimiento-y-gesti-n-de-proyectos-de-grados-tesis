@@ -3,7 +3,7 @@ from app.repositories.trabajo_grado_jurado_repo import TrabajoGradoJuradoReposit
 from app.models.trabajo_grado_jurado import Actualizar_trabajo_grado_jurado
 from app.models.trabajo_grado_jurado import Crear_trabajo_grado_jurado
 
-router = APIRouter(prefix="/trabajoGradoJurado", tags=["Gestión de los trabajos de grados asignados a los jurados"])
+router = APIRouter(prefix="/trabajo_grado_jurado", tags=["Gestión de los trabajos de grados asignados a los jurados"])
 repo = TrabajoGradoJuradoRepository()
 
 
