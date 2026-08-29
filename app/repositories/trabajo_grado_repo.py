@@ -1,7 +1,6 @@
 from app.core.database import Database
 from app.models.trabajo_grado import Trabajo_grado
-from app.models.trabajo_grado import ActualizarTrabajoGrado
-from app.models.trabajo_grado import CrearTrabajoGrado
+
 
 
 class TrabajoGradoRepository: 
@@ -25,14 +24,14 @@ class TrabajoGradoRepository:
         trabajo_grado = cursor.fetchone()
         return trabajo_grado
     
-    def crearTrabajoGrado(self, trabajo_grado: CrearTrabajoGrado):
+    def crearTrabajoGrado(self, trabajo_grado: Trabajo_grado):
         conn = self.db.getConnection()
         cursor = conn.cursor()
         query = """
-            INSERT INTO trabajo_grado (titulo, descripcion, estado, fecha_inicio, fecha_estimada_finalizacion)
-            VALUES (%s, %s, %s, %s, %s) RETURNING id_trabajo_grado;
+            INSERT INTO trabajo_grado (id_carrera,titulo, resumen, linea_investigacion, fecha_inicio, fecha_fin, estado, fecha_sustentacion, observaciones_finales)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id_trabajo_grado;
         """
-        cursor.execute(query, (trabajo_grado.titulo, trabajo_grado.descripcion, trabajo_grado.estado, trabajo_grado.fecha_inicio, trabajo_grado.fecha_estimada_finalizacion))
+        cursor.execute(query, (trabajo_grado.id_carrera,trabajo_grado.titulo, trabajo_grado.resumen, trabajo_grado.linea_investigacion,trabajo_grado.fecha_inicio, trabajo_grado.fecha_fin, trabajo_grado.estado, trabajo_grado.fecha_sustentacion, trabajo_grado.observaciones_finales))
         id_trabajo_grado_nuevo = cursor.fetchone()["id_trabajo_grado"]
         
         conn.commit()
@@ -41,14 +40,14 @@ class TrabajoGradoRepository:
         return id_trabajo_grado_nuevo
     
     
-    def actualizarTrabajoGrado(self, id_trabajo_grado: int, trabajo_grado: ActualizarTrabajoGrado):
+    def actualizarTrabajoGrado(self, id_trabajo_grado: int, trabajo_grado: Trabajo_grado):
         conn = self.db.getConnection()
         cursor = conn.cursor()
         query = """
-            UPDATE trabajo_grado SET titulo =%s, estado = %s, fecha_estimada_finalizacion = %s WHERE id_trabajo_grado = %s RETURNING id_trabajo_grado;
+            UPDATE trabajo_grado SET titulo =%s, fecha_fin = %s, estado = %s, fecha_sustentacion = %s, observaciones_finales = %s WHERE id_trabajo_grado = %s RETURNING id_trabajo_grado;
         """
         
-        cursor.execute(query, (trabajo_grado.titulo, trabajo_grado.estado, trabajo_grado.fecha_estimada_finalizacion, id_trabajo_grado))
+        cursor.execute(query, (trabajo_grado.titulo, trabajo_grado.fecha_fin, trabajo_grado.estado,trabajo_grado.fecha_sustentacion, trabajo_grado.observaciones_finales,id_trabajo_grado))
         
         trabajoGradoActualizado = cursor.fetchone()
         conn.commit()

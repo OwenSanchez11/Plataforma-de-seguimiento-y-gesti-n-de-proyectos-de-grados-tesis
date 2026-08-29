@@ -1,7 +1,6 @@
 from app.core.database import Database
 from app.models.rol import Rol
-from app.models.rol import CrearRol
-from app.models.rol import ActualizarRol
+
 
 class RolRepository:
     def __init__(self):
@@ -23,7 +22,7 @@ class RolRepository:
         rol = cursor.fetchone()
         return rol
     
-    def crearRol(self, rol: CrearRol):
+    def crearRol(self, rol: Rol):
         conn = self.db.getConnection()
         cursor = conn.cursor()
         query = """
@@ -38,7 +37,7 @@ class RolRepository:
         
         return id_rol 
     
-    def actualizarRol(self, id_rol: int, rol: ActualizarRol):
+    def actualizarRol(self, id_rol: int, rol: Rol):
         conn = self.db.getConnection()
         cursor = conn.cursor()
         query = """

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.models.rol_usuario import CrearRelacionUsuarioRol
-from app.models.rol_usuario import ActualizarRelacionRolYUsuario
+from app.models.rol_usuario import RolUsuario
 from app.repositories.rol_usuario_repo import RolUsuarioRepository
 
 router = APIRouter(prefix="/rol_usuario", tags=["Gestión de los roles asignados a cada usuario del sistema"])
@@ -20,12 +19,12 @@ def obtener_roles_usuarios_por_id(id_rol_usuario: int):
     return rolUsuario
 
 @router.post("/")
-def crear_relacion_usuario_rol(rol_usuario: CrearRelacionUsuarioRol):
+def crear_relacion_usuario_rol(rol_usuario: RolUsuario):
     nuevo_rol_usuario = repo.crearRelacionUsuarioRol(rol_usuario)
     return {"Mensaje ": "relación registrada exitosamente", "id": nuevo_rol_usuario}
 
 @router.put("/{id_rol_usuario}")
-def actualizar_rol_del_usuario(id_rol: int, rol_usuario: ActualizarRelacionRolYUsuario):
+def actualizar_rol_del_usuario(id_rol: int, rol_usuario: RolUsuario):
     actualizarRelacionRolUsuario = repo.actualizarRelacionUsuarioRol(id_rol, rol_usuario)
     
     return {

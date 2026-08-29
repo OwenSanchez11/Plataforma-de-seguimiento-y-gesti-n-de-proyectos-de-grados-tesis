@@ -156,158 +156,41 @@ Al iniciar el servidor, la API queda disponible normalmente en:
 | PUT | `/trabajo_grado/{id_trabajo_grado}` | Actualizar trabajo de grado |
 | DELETE | `/trabajo_grado/{id_trabajo_grado}` | Eliminar trabajo de grado |
 
-### Trabajo de grado estudiante
 
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `trabajo_grado_estudiante` |
-| Ruta API | `app/api/rutas_trabajo_grado_estudiantes.py` |
-| Modelo | `app/models/trabajo_grado_estudiante.py` |
-| Repositorio | `app/repositories/trabajo_grado_estudiante_repo.py` |
-| Clase repositorio | `TrabajoGradoEstudianteRepository` |
-| Modelos Pydantic | `Trabajo_grado_estudiante`, `CrearTrabajoGradoPorEstudiante`, `ActualizarTrabajoGradoPorEstudiante` |
-| Campos principales | `id_trabajo_grado_estudiante`, `id_trabajo_grado`, `id_estudiante` |
 
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/trabajo_grado_estudiantes/` | Listar asignaciones de trabajos a estudiantes |
-| GET | `/trabajo_grado_estudiantes/{id_trabajo_grado_estudiante}` | Consultar asignacion por ID |
-| POST | `/trabajo_grado_estudiantes/` | Asignar trabajo de grado a estudiante |
-| PUT | `/trabajo_grado_estudiantes/{id_trabajo_grado_estudiante}` | Actualizar asignacion |
-| DELETE | `/trabajo_grado_estudiantes/{id_trabajo_grado_estudiante}` | Eliminar asignacion |
-
-### Trabajo de grado director
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `trabajo_grado_director` |
-| Ruta API | `app/api/rutas_trabajo_grado_director.py` |
-| Modelo | `app/models/trabajo_grado_director.py` |
-| Repositorio | `app/repositories/trabajo_grado_director_repo.py` |
-| Clase repositorio | `TrabajoGradoDirectorRepository` |
-| Modelos Pydantic | `Trabajo_grado_director`, `Crear_trabajo_grado_director`, `Actualizar_trabajo_grado_director` |
-| Campos principales | `id_trabajo_grado_director`, `id_trabajo_grado`, `id_profesor` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/trabajo_grado_director/` | Listar asignaciones de trabajos a directores |
-| GET | `/trabajo_grado_director/{id_trabajo_grado_director}` | Consultar asignacion por ID |
-| POST | `/trabajo_grado_director/` | Asignar director a trabajo de grado |
-| PUT | `/trabajo_grado_director/{id_trabajo_grado_director}` | Actualizar asignacion |
-| DELETE | `/trabajo_grado_director/{id_trabajo_grado_director}` | Eliminar asignacion |
-
-### Trabajo de grado jurado
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `trabajo_grado_jurado` |
-| Ruta API | `app/api/rutas_trabajo_grado_jurado.py` |
-| Modelo | `app/models/trabajo_grado_jurado.py` |
-| Repositorio | `app/repositories/trabajo_grado_jurado_repo.py` |
-| Clase repositorio | `TrabajoGradoJuradoRepository` |
-| Modelos Pydantic | `Trabajo_grado_jurado`, `Crear_trabajo_grado_jurado`, `Actualizar_trabajo_grado_jurado` |
-| Campos principales | `id_trabajo_grado_jurado`, `id_trabajo_grado`, `id_profesor` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/trabajo_grado_jurado/` | Listar asignaciones de trabajos a jurados |
-| GET | `/trabajo_grado_jurado/{id_trabajo_grado_jurado}` | Consultar asignacion por ID |
-| POST | `/trabajo_grado_jurado/` | Asignar jurado a trabajo de grado |
-| PUT | `/trabajo_grado_jurado/{id_trabajo_grado_jurado}` | Actualizar asignacion |
-| DELETE | `/trabajo_grado_jurado/{id_trabajo_grado_jurado}` | Eliminar asignacion |
-
-### Hito
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `hitos` |
-| Ruta API | `app/api/rutas_hito.py` |
-| Modelo | `app/models/hito.py` |
-| Repositorio | `app/repositories/hito_repo.py` |
-| Clase repositorio | `HitoRepository` |
-| Modelos Pydantic | `Hito`, `CrearHito`, `ActualizarHito` |
-| Campos principales | `id_hito`, `id_trabajo_grado`, `titulo`, `descripcion`, `fecha_inicio`, `fecha_limite`, `estado` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/hitos/` | Listar hitos |
-| GET | `/hitos/{id_hito}` | Consultar hito por ID |
-| POST | `/hitos/` | Crear hito |
-| PUT | `/hitos/{id_hito}` | Actualizar hito |
-| DELETE | `/hitos/{id_hito}` | Eliminar hito |
-
-### Entrega
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `entregas` |
-| Ruta API | `app/api/rutas_entrega.py` |
-| Modelo | `app/models/entrega.py` |
-| Repositorio | `app/repositories/entrega_repo.py` |
-| Clase repositorio | `EntregaRepository` |
-| Modelos Pydantic | `Entrega`, `CrearEntrega`, `ActualizarEntrega` |
-| Campos principales | `id_entrega`, `id_hito`, `numero_version`, `nombre_archivo`, `ruta_archivo`, `comentarios`, `estado`, `fecha_entrega` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/entrega/` | Listar entregas |
-| GET | `/entrega/{id_entrega}` | Consultar entrega por ID |
-| POST | `/entrega/` | Crear entrega |
-| PUT | `/entrega/{id_entrega}` | Actualizar entrega |
-| DELETE | `/entrega/{id_entrega}` | Eliminar entrega |
-
-### Retroalimentacion
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `retroalimentaciones` |
-| Ruta API | `app/api/rutas_retroalimentaciones.py` |
-| Modelo | `app/models/retroalimentaciones.py` |
-| Repositorio | `app/repositories/retroalimentacion_repo.py` |
-| Clase repositorio | `RetroalimentacionesRepository` |
-| Modelos Pydantic | `Retroalimentacion`, `CrearRetroalimentacion`, `ActualizarRetroalimentacion` |
-| Campos principales | `id_retroalimentacion`, `id_entrega`, `id_profesor`, `comentario`, `estado`, `fecha_creacion` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/retroalimentaciones/` | Listar retroalimentaciones |
-| GET | `/retroalimentaciones/{id_retroalimentacion}` | Consultar retroalimentacion por ID |
-| POST | `/retroalimentaciones/` | Crear retroalimentacion |
-| PUT | `/retroalimentaciones/{id_retroalimentacion}` | Actualizar retroalimentacion |
-| DELETE | `/retroalimentaciones/{id_retroalimentacion}` | Eliminar retroalimentacion |
-
-## Resumen general de endpoints
-
-| Entidad | Base path | GET listar | GET por ID | POST crear | PUT actualizar | DELETE eliminar |
-| --- | --- | --- | --- | --- | --- | --- |
-| Usuarios | `/usuarios` | `/usuarios/` | `/usuarios/{id_user}` | `/usuarios/` | `/usuarios/{id_user}` | `/usuarios/{id_user}` |
-| Roles | `/rol` | `/rol/` | `/rol/{id_rol}` | `/rol/` | `/rol/{id_rol}` | `/rol/{id_rol}` |
-| Roles por usuario | `/rol_usuario` | `/rol_usuario/` | `/rol_usuario/{id_rol_usuario}` | `/rol_usuario/` | `/rol_usuario/{id_rol_usuario}` | `/rol_usuario/{id_rol_usuario}` |
-| Trabajos de grado | `/trabajo_grado` | `/trabajo_grado/` | `/trabajo_grado/{id_trabajo_grado}` | `/trabajo_grado/` | `/trabajo_grado/{id_trabajo_grado}` | `/trabajo_grado/{id_trabajo_grado}` |
-| Trabajos por estudiante | `/trabajo_grado_estudiantes` | `/trabajo_grado_estudiantes/` | `/trabajo_grado_estudiantes/{id_trabajo_grado_estudiante}` | `/trabajo_grado_estudiantes/` | `/trabajo_grado_estudiantes/{id_trabajo_grado_estudiante}` | `/trabajo_grado_estudiantes/{id_trabajo_grado_estudiante}` |
-| Trabajos por director | `/trabajo_grado_director` | `/trabajo_grado_director/` | `/trabajo_grado_director/{id_trabajo_grado_director}` | `/trabajo_grado_director/` | `/trabajo_grado_director/{id_trabajo_grado_director}` | `/trabajo_grado_director/{id_trabajo_grado_director}` |
-| Trabajos por jurado | `/trabajo_grado_jurado` | `/trabajo_grado_jurado/` | `/trabajo_grado_jurado/{id_trabajo_grado_jurado}` | `/trabajo_grado_jurado/` | `/trabajo_grado_jurado/{id_trabajo_grado_jurado}` | `/trabajo_grado_jurado/{id_trabajo_grado_jurado}` |
-| Hitos | `/hitos` | `/hitos/` | `/hitos/{id_hito}` | `/hitos/` | `/hitos/{id_hito}` | `/hitos/{id_hito}` |
-| Entregas | `/entrega` | `/entrega/` | `/entrega/{id_entrega}` | `/entrega/` | `/entrega/{id_entrega}` | `/entrega/{id_entrega}` |
-| Retroalimentaciones | `/retroalimentaciones` | `/retroalimentaciones/` | `/retroalimentaciones/{id_retroalimentacion}` | `/retroalimentaciones/` | `/retroalimentaciones/{id_retroalimentacion}` | `/retroalimentaciones/{id_retroalimentacion}` |
 
 ## Diagrama entidad-relacion
 
 ```mermaid
 erDiagram
+
+    FACULTAD {
+        int id_facultad PK
+        string nombre_facultad
+        string codigo_facultad
+    }
+
+    CARRERA {
+        int id_carrera PK
+        int id_facultad FK
+        string nombre_carrera
+        string codigo_carrera
+    }
+
     USUARIO {
         int id_user PK
-        varchar username
-        varchar nombre
-        varchar apellido
-        varchar email
-        varchar documento
-        varchar contrasena
+        int id_carrera FK "Opcional / Nullable"
+        string username UK
+        string nombre
+        string apellido
+        string email UK
+        string documento UK
+        string contraseña
     }
 
     ROL {
         int id_rol PK
-        varchar rol_nombre
+        string rol_nombre
     }
 
     ROL_USUARIO {
@@ -316,87 +199,139 @@ erDiagram
         int id_rol FK
     }
 
+    MODULOS {
+        int id_modulo PK
+        string nombre_modulo
+        boolean estado
+    }
+
+    PERMISOS {
+        int id_permiso PK
+        string nombre_permiso
+    }
+
+    MODULO_ROL {
+        int id_modulo_rol PK
+        int id_rol FK
+        int id_modulo FK
+        int id_permiso FK
+    }
+
     TRABAJO_GRADO {
         int id_trabajo_grado PK
-        varchar titulo
-        varchar descripcion
-        varchar estado
+        int id_carrera FK
+        string titulo
+        text resumen
+        string linea_investigacion
         date fecha_inicio
-        date fecha_estimada_finalizacion
+        date fecha_fin
+        string estado
+        date fecha_sustentacion
+        text observaciones_finales
     }
 
-    TRABAJO_GRADO_ESTUDIANTE {
-        int id_trabajo_grado_estudiante PK
+    ASIGNACION {
+        int id_asignacion PK
         int id_trabajo_grado FK
-        int id_estudiante FK
+        int id_usuario FK
+        int id_rol FK
+        date fecha_asignacion
+        boolean estado
     }
 
-    TRABAJO_GRADO_DIRECTOR {
-        int id_trabajo_grado_director PK
+    AVANCES {
+        int id_avance PK
         int id_trabajo_grado FK
-        int id_profesor FK
-    }
-
-    TRABAJO_GRADO_JURADO {
-        int id_trabajo_grado_jurado PK
-        int id_trabajo_grado FK
-        int id_profesor FK
-    }
-
-    HITOS {
-        int id_hito PK
-        int id_trabajo_grado FK
-        varchar titulo
+        string titulo
         text descripcion
         date fecha_inicio
         date fecha_limite
-        varchar estado
+        string estado
     }
 
     ENTREGAS {
         int id_entrega PK
         int id_hito FK
         int numero_version
-        varchar nombre_archivo
-        varchar ruta_archivo
+        string nombre_archivo
+        string ruta_archivo
+        int tamano_bytes
         text comentarios
-        varchar estado
+        string estado
         date fecha_entrega
     }
 
     RETROALIMENTACIONES {
         int id_retroalimentacion PK
+        int id_usuario FK
         int id_entrega FK
-        int id_profesor FK
         text comentario
-        varchar estado
+        string estado
         date fecha_creacion
     }
 
-    USUARIO ||--o{ ROL_USUARIO : tiene
-    ROL ||--o{ ROL_USUARIO : asignado
-    TRABAJO_GRADO ||--o{ TRABAJO_GRADO_ESTUDIANTE : tiene
-    USUARIO ||--o{ TRABAJO_GRADO_ESTUDIANTE : estudiante
-    TRABAJO_GRADO ||--o{ TRABAJO_GRADO_DIRECTOR : tiene
-    USUARIO ||--o{ TRABAJO_GRADO_DIRECTOR : dirige
-    TRABAJO_GRADO ||--o{ TRABAJO_GRADO_JURADO : tiene
-    USUARIO ||--o{ TRABAJO_GRADO_JURADO : jurado
-    TRABAJO_GRADO ||--o{ HITOS : contiene
-    HITOS ||--o{ ENTREGAS : recibe
-    ENTREGAS ||--o{ RETROALIMENTACIONES : recibe
-    USUARIO ||--o{ RETROALIMENTACIONES : realiza
+    EVALUACION_FINAL {
+        int id_evaluacion PK
+        int id_trabajo_grado FK
+        int id_usuario FK
+        decimal nota
+        string veredicto
+        text observaciones
+        date fecha_evaluacion
+    }
+
+    %% --- RELACIONES ---
+
+    FACULTAD ||--|{ CARRERA : "ofrece"
+    CARRERA ||--o{ USUARIO : "pertenece"
+    CARRERA ||--|{ TRABAJO_GRADO : "pertenece"
+
+    USUARIO ||--|{ ROL_USUARIO : "posee"
+    ROL ||--|{ ROL_USUARIO : "asignado_a"
+
+    ROL ||--|{ MODULO_ROL : "tiene"
+    MODULOS ||--|{ MODULO_ROL : "contiene"
+    PERMISOS ||--|{ MODULO_ROL : "otorga"
+
+    TRABAJO_GRADO ||--|{ ASIGNACION : "tiene"
+    USUARIO ||--|{ ASIGNACION : "participa_en"
+    ROL ||--|{ ASIGNACION : "rol_en"
+
+    TRABAJO_GRADO ||--|{ AVANCES : "planifica"
+    AVANCES ||--|{ ENTREGAS : "recibe"
+
+    ENTREGAS ||--o{ RETROALIMENTACIONES : "genera"
+    USUARIO ||--|{ RETROALIMENTACIONES : "realiza"
+
+    TRABAJO_GRADO ||--o{ EVALUACION_FINAL : "recibe"
+    USUARIO ||--|{ EVALUACION_FINAL : "evalua"
 ```
 
-## Flujo general del sistema
 
-1. Se registra un usuario en `/usuarios/`.
-2. Se crea un rol en `/rol/`.
-3. Se asigna el rol al usuario en `/rol_usuario/`.
-4. Se registra un trabajo de grado en `/trabajo_grado/`.
-5. Se asignan estudiantes, director y jurados al trabajo de grado.
-6. Se crean hitos asociados al trabajo de grado.
-7. Se registran entregas para cada hito.
-8. Los profesores registran retroalimentaciones sobre las entregas.
+## Flujo general del sistema
+Flujo general del sistema
+
+1. Se registra una facultad en `/facultad/` y sus carreras asociadas en  `/carrera/ `.
+
+2. Se registra un usuario en  `/usuario/ `.
+
+3. Se crea un rol en  `/rol/ `.
+
+4. Se asigna el rol al usuario en  `/rol_usuario/ `.
+
+5. Se definen módulos en  `/modulos/ `, permisos en  `/permisos/ ` y se vinculan en  `/modulo_rol/ `.
+
+6. Se registra un trabajo de grado en  `/trabajo_grado/ `.
+
+7. Se asignan estudiantes, tutores y jurados al trabajo de grado en  `/asignacion/ `.
+
+8. Se crean avances (hitos) asociados al trabajo de grado en  `/avances/ `.
+
+9. Los estudiantes registran entregas para cada hito en  `/entregas/ `.
+
+10. Los docentes/tutores registran retroalimentaciones sobre las entregas en  `/retroalimentaciones/ `.
+
+11. Los jurados registran la nota final y veredicto en  `/evaluacion_final/ `.
 
 ## Autores
 

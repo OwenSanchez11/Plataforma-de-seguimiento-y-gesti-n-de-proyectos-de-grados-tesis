@@ -1,8 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.models.trabajo_grado import Trabajo_grado
-from app.models.trabajo_grado import ActualizarTrabajoGrado
 from app.repositories.trabajo_grado_repo import TrabajoGradoRepository
-from app.models.trabajo_grado import CrearTrabajoGrado
 
 router = APIRouter(prefix="/trabajo_grado", tags=["Gestión de los trabajos de grado del sistema"])
 repo = TrabajoGradoRepository()
@@ -21,12 +19,12 @@ def obtener_trabajos_de_grado_por_id(id_trabajo_grado: int):
     return trabajo_grado
 
 @router.post("/")
-def crear_trabajo_grado(trabajo_grado: CrearTrabajoGrado):
+def crear_trabajo_grado(trabajo_grado: Trabajo_grado):
     nuevo_trabajo_grado = repo.crearTrabajoGrado(trabajo_grado)
     return {"Mensaje ": "Trabajo registrado exitosamente en la base de datos", "id: ": nuevo_trabajo_grado} 
 
 @router.put("/{id_trabajo_grado}")
-def actualizar_trabajo_grado(id_trabajo_grado: int, trabajo_grado: ActualizarTrabajoGrado):
+def actualizar_trabajo_grado(id_trabajo_grado: int, trabajo_grado: Trabajo_grado):
     actualizar_trabajo_grado = repo.actualizarTrabajoGrado(id_trabajo_grado, trabajo_grado)
     
     return {

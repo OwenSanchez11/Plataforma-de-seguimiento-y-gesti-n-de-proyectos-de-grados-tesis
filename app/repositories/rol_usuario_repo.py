@@ -1,7 +1,5 @@
 from app.core.database import Database
 from app.models.rol_usuario import RolUsuario
-from app.models.rol_usuario import CrearRelacionUsuarioRol
-from app.models.rol_usuario import ActualizarRelacionRolYUsuario
 
 class RolUsuarioRepository:
     def __init__(self):
@@ -26,7 +24,7 @@ class RolUsuarioRepository:
         rolUsuario = cursor.fetchone()
         return rolUsuario
     
-    def crearRelacionUsuarioRol(self, rol_usuario: CrearRelacionUsuarioRol):
+    def crearRelacionUsuarioRol(self, rol_usuario: RolUsuario):
         conn = self.db.getConnection()
         cursor = conn.cursor()
         query = """
@@ -42,7 +40,7 @@ class RolUsuarioRepository:
         
         return id_rol_usuario
     
-    def actualizarRelacionUsuarioRol(self, id_rol_usuario: int, rol_usuario: ActualizarRelacionRolYUsuario):
+    def actualizarRelacionUsuarioRol(self, id_rol_usuario: int, rol_usuario: RolUsuario):
         conn = self.db.getConnection()
         cursor = conn.cursor()
         query= """

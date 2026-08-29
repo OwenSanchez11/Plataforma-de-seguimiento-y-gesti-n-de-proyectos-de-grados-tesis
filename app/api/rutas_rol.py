@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.models.rol import Rol
 from app.repositories.rol_repo import RolRepository
-from app.models.rol import CrearRol
-from app.models.rol import ActualizarRol
+
 
 router = APIRouter(prefix="/rol", tags=["Gestión de roles del sistema"])
 repo = RolRepository()
@@ -20,12 +19,12 @@ def obtener_rol_por_id(id_rol: int):
     return rol
 
 @router.post("/")
-def crear_rol(rol: CrearRol):
+def crear_rol(rol: Rol):
     nuevo_id_rol = repo.crearRol(rol)
     return {"Mensaje ": "Rol registrado exitosamente", "id": nuevo_id_rol}
 
 @router.put("/{id_rol}")
-def actualizar_roles(id_rol: int, rol: ActualizarRol):
+def actualizar_roles(id_rol: int, rol: Rol):
     actualizarRol = repo.actualizarRol(id_rol, rol)
     
     return {
