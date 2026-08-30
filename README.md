@@ -157,6 +157,85 @@ Al iniciar el servidor, la API queda disponible normalmente en:
 | DELETE | `/trabajo_grado/{id_trabajo_grado}` | Eliminar trabajo de grado |
 
 
+### Facultad
+
+| Elemento | Detalle |
+| --- | --- |
+| Entidad / tabla | `facultad` |
+| Ruta API | `app/api/rutas_facultad.py` |
+| Modelo | `app/models/facultad.py` |
+| Repositorio | `app/repositories/facultad_repo.py` |
+| Clase repositorio | `FacultadRepository` |
+| Campos principales | `id_facultad`, `nombre_facultad`, `codigo_facultad` |
+
+| Método | Endpoint | Acción |
+| --- | --- | --- |
+| GET | `/facultad/` | Listar facultades |
+| GET | `/facultad/{id_facultad}` | Consultar facultad por ID |
+| POST | `/facultad/` | Crear facultad |
+| PUT | `/facultad/{id_facultad}` | Actualizar facultad |
+| DELETE | `/facultad/{id_facultad}` | Eliminar facultad |
+
+
+### Carrera
+
+| Elemento | Detalle |
+| --- | --- |
+| Entidad / tabla | `carrera` |
+| Ruta API | `app/api/rutas_carrera.py` |
+| Modelo | `app/models/carrera.py` |
+| Repositorio | `app/repositories/carrera_repo.py` |
+| Clase repositorio | `CarreraRepository` |
+| Campos principales | `id_carrera`, `id_facultad`, `nombre_carrera`, `codigo_carrera` |
+
+| Método | Endpoint | Acción |
+| --- | --- | --- |
+| GET | `/carrera/` | Listar carreras |
+| GET | `/carrera/{id_carrera}` | Consultar carrera por ID |
+| POST | `/carrera/` | Crear carrera |
+| PUT | `/carrera/{id_carrera}` | Actualizar carrera |
+| DELETE | `/carrera/{id_carrera}` | Eliminar carrera |
+
+
+### Asignación
+
+| Elemento | Detalle |
+| --- | --- |
+| Entidad / tabla | `asignacion` |
+| Ruta API | `app/api/rutas_asignacion.py` |
+| Modelo | `app/models/asignacion.py` |
+| Repositorio | `app/repositories/asignacion_repo.py` |
+| Clase repositorio | `AsignacionRepository` |
+| Campos principales | `id_asignacion`, `id_trabajo_grado`, `id_usuario`, `id_rol`, `fecha_asignacion`, `estado` |
+
+| Método | Endpoint | Acción |
+| --- | --- | --- |
+| GET | `/asignacion/` | Listar asignaciones |
+| GET | `/asignacion/{id_asignacion}` | Consultar asignación por ID |
+| POST | `/asignacion/` | Crear asignación |
+| PUT | `/asignacion/{id_asignacion}` | Actualizar asignación |
+| DELETE | `/asignacion/{id_asignacion}` | Eliminar asignación |
+
+
+### Avances
+
+| Elemento | Detalle |
+| --- | --- |
+| Entidad / tabla | `avances` |
+| Ruta API | `app/api/rutas_avances.py` |
+| Modelo | `app/models/avances.py` |
+| Repositorio | `app/repositories/avances_repo.py` |
+| Clase repositorio | `AvancesRepository` |
+| Campos principales | `id_avance`, `id_trabajo_grado`, `titulo`, `descripcion`, `fecha_inicio`, `fecha_limite`, `estado` |
+
+| Método | Endpoint | Acción |
+| --- | --- | --- |
+| GET | `/avances/` | Listar avances |
+| GET | `/avances/{id_avance}` | Consultar avance por ID |
+| POST | `/avances/` | Crear avance |
+| PUT | `/avances/{id_avance}` | Actualizar avance |
+| DELETE | `/avances/{id_avance}` | Eliminar avance |
+
 
 
 ## Diagrama entidad-relacion
@@ -325,7 +404,7 @@ Flujo general del sistema
 
 7. Se asignan estudiantes, tutores y jurados al trabajo de grado en  `/asignacion/ `.
 
-8. Se crean avances (hitos) asociados al trabajo de grado en  `/avances/ `.
+8. Se crean avances (avances) asociados al trabajo de grado en  `/avances/ `.
 
 9. Los estudiantes registran entregas para cada hito en  `/entregas/ `.
 
