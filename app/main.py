@@ -9,6 +9,8 @@ from app.api import rutas_retroalimentaciones
 from app.api import rutas_facultad
 from app.api import rutas_carrera
 from app.api import rutas_asignacion
+from app.api import rutas_evaluacion
+from app.api import rutas_permiso
 
 app = FastAPI(title="Backend sistema de seguimiento de trabajos de grados",
               description="Sistema diseñado para hacer seguimiento a los trabajos de grados realizadaos por los estudiantes de la universidad", version="1.0.0")
@@ -23,3 +25,5 @@ app.include_router(rutas_retroalimentaciones.router)
 app.include_router(rutas_facultad.router)
 app.include_router(rutas_carrera.router)
 app.include_router(rutas_asignacion.router)
+app.include_router(rutas_evaluacion.router)
+app.include_router(rutas_permiso.router)
