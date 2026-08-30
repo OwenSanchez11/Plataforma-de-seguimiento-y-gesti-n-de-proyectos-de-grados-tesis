@@ -4,31 +4,19 @@ from datetime import date
 
 
 class Entrega(BaseModel):
+
     id_entrega: Optional[int] = None
-    id_hito: int
-    numero_version: int
-    nombre_archivo: str
-    ruta_archivo: str
+
+    id_avances: Optional[int] = None
+
+    numero_version: Optional[int] = None
+
+    nombre_archivo: Optional[str] = None
+
+    ruta_archivo: Optional[str] = None
+
     comentarios: Optional[str] = None
-    estado: str
-    fecha_entrega: date
 
+    estado: Optional[str] = None
 
-class CrearEntrega(BaseModel):
-    id_hito: int
-    numero_version: int
-    nombre_archivo: str
-    ruta_archivo: str
-    comentarios: Optional[str] = None
-    estado: str
-    fecha_entrega: date
-
-
-class ActualizarEntrega(BaseModel):
-    id_hito: int
-    numero_version: int
-    nombre_archivo: str
-    ruta_archivo: str
-    comentarios: Optional[str] = None
-    estado: str
-    fecha_entrega: date
+    fecha_entrega: Optional[date] = None

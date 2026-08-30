@@ -4,28 +4,17 @@ from datetime import date
 
 
 class Avances(BaseModel):
+
     id_avances: Optional[int] = None
-    id_trabajo_grado: int
-    titulo: str
+
+    id_trabajo_grado: Optional[int] = None
+
+    titulo: Optional[str] = None
+
     descripcion: Optional[str] = None
-    fecha_inicio: date
-    fecha_limite: date
-    estado: str
 
+    fecha_inicio: Optional[date] = None
 
-class CrearAvances(BaseModel):
-    id_trabajo_grado: int
-    titulo: str
-    descripcion: Optional[str] = None
-    fecha_inicio: date
-    fecha_limite: date
-    estado: str
+    fecha_limite: Optional[date] = None
 
-
-class ActualizarAvances(BaseModel):
-    id_trabajo_grado: int
-    titulo: str
-    descripcion: Optional[str] = None
-    fecha_inicio: date
-    fecha_limite: date
-    estado: str
+    estado: Optional[str] = None

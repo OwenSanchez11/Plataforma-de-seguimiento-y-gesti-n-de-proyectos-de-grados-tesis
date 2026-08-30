@@ -1,5 +1,5 @@
 from app.core.database import Database
-from app.models.asignacion import AsignacionCrear, ActualizarAsignacion
+from app.models.asignacion import Asignacion
 
 
 class AsignacionRepository:
@@ -7,7 +7,9 @@ class AsignacionRepository:
     def __init__(self):
         self.db = Database()
 
+
     def obtenerAsignaciones(self):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -23,7 +25,9 @@ class AsignacionRepository:
 
         return asignaciones
 
+
     def obtenerAsignacionPorId(self, id_asignacion: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -39,7 +43,9 @@ class AsignacionRepository:
 
         return asignacion
 
-    def crearAsignacion(self, asignacion: AsignacionCrear):
+
+    def crearAsignacion(self, asignacion: Asignacion):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -75,6 +81,7 @@ class AsignacionRepository:
         id_asignacion = cursor.fetchone()["id_asignacion"]
 
         conn.commit()
+
         conn.close()
 
         return {
@@ -82,11 +89,13 @@ class AsignacionRepository:
             "id_asignacion": id_asignacion
         }
 
+
     def actualizarAsignacion(
         self,
         id_asignacion: int,
-        asignacion: ActualizarAsignacion
+        asignacion: Asignacion
     ):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -117,9 +126,11 @@ class AsignacionRepository:
         asignacion_actualizada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
         if asignacion_actualizada is None:
+
             return {
                 "mensaje": "Asignación no encontrada"
             }
@@ -128,7 +139,9 @@ class AsignacionRepository:
             "mensaje": "Asignación actualizada correctamente"
         }
 
+
     def eliminarAsignacion(self, id_asignacion: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -141,9 +154,11 @@ class AsignacionRepository:
         eliminada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
         if eliminada is None:
+
             return {
                 "mensaje": "Asignación no encontrada"
             }

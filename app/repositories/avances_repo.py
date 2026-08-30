@@ -1,6 +1,5 @@
 from app.core.database import Database
-from app.models.avances import CrearAvances
-from app.models.avances import ActualizarAvances
+from app.models.avances import Avances
 
 
 class AvancesRepository:
@@ -8,7 +7,9 @@ class AvancesRepository:
     def __init__(self):
         self.db = Database()
 
+
     def obtenerAvances(self):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -24,7 +25,9 @@ class AvancesRepository:
 
         return avances
 
+
     def obtenerAvancesPorId(self, id_avances: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -40,7 +43,9 @@ class AvancesRepository:
 
         return avances
 
-    def crearAvances(self, avances: CrearAvances):
+
+    def crearAvances(self, avances: Avances):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -72,15 +77,18 @@ class AvancesRepository:
         id_avances = cursor.fetchone()["id_avances"]
 
         conn.commit()
+
         conn.close()
 
         return id_avances
 
+
     def actualizarAvances(
         self,
         id_avances: int,
-        avances: ActualizarAvances
+        avances: Avances
     ):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -110,14 +118,17 @@ class AvancesRepository:
             )
         )
 
-        avancesActualizado = cursor.fetchone()
+        avances_actualizado = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
-        return avancesActualizado is not None
+        return avances_actualizado is not None
+
 
     def eliminarAvances(self, id_avances: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -130,6 +141,7 @@ class AvancesRepository:
         eliminado = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
         return eliminado is not None

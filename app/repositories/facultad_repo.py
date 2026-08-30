@@ -1,121 +1,125 @@
-from app.core.database import Database
-from app.models.facultad import FacultadCrear, ActualizarFacultad
+from app.core.database import get_connection
+from app.models.facultad import Facultad
 
 
 class FacultadRepository:
 
-    def __init__(self):
-        self.db = Database()
-
     def obtenerFacultades(self):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT id_facultad, nombre_facultad, codigo_facultad
-            FROM facultad
-            ORDER BY id_facultad ASC;
-        """)
+        cn = get_connection()
+        cursor = cn.cursor(dictionary=True)
+
+        sql = "SELECT * FROM facultad"
+
+        cursor.execute(sql)
 
         facultades = cursor.fetchall()
 
-        conn.close()
+        cursor.close()
+        cn.close()
 
         return facultades
 
-    def obtenerFacultadPorId(self, id_facultad: int):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT id_facultad, nombre_facultad, codigo_facultad
+    def obtenerFacultadPorId(self, id_facultad: int):
+
+        cn = get_connection()
+        cursor = cn.cursor(dictionary=True)
+
+        sql = """
+            SELECT *
             FROM facultad
-            WHERE id_facultad = %s;
-        """, (id_facultad,))
+            WHERE id_facultad = %s
+        """
+
+        cursor.execute(sql, (id_facultad,))
 
         facultad = cursor.fetchone()
 
-        conn.close()
+        cursor.close()
+        cn.close()
 
         return facultad
 
-    def crearFacultad(self, facultad: FacultadCrear):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
 
-        query = """
-            INSERT INTO facultad (
-                nombre_facultad,
-                codigo_facultad
-            )
+    def crearFacultad(self, facultad: Facultad):
+
+        cn = get_connection()
+        cursor = cn.cursor()
+
+        sql = """
+            INSERT INTO facultad
+            (nombre_facultad, codigo_facultad)
             VALUES (%s, %s)
-            RETURNING id_facultad;
         """
 
-        cursor.execute(
-            query,
-            (
-                facultad.nombre_facultad,
-                facultad.codigo_facultad
-            )
+        valores = (
+            facultad.nombre_facultad,
+            facultad.codigo_facultad
         )
 
-        id_facultad = cursor.fetchone()["id_facultad"]
+        cursor.execute(sql, valores)
 
-        conn.commit()
-        conn.close()
+        cn.commit()
+
+        id_facultad = cursor.lastrowid
+
+        cursor.close()
+        cn.close()
 
         return {
             "mensaje": "Facultad creada correctamente",
             "id_facultad": id_facultad
         }
 
-    def actualizarFacultad(
-        self,
-        id_facultad: int,
-        facultad: ActualizarFacultad
-    ):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
 
-        query = """
+    def actualizarFacultad(self, id_facultad: int, facultad: Facultad):
+
+        cn = get_connection()
+        cursor = cn.cursor()
+
+        sql = """
             UPDATE facultad
-            SET
-                nombre_facultad = %s,
+            SET nombre_facultad = %s,
                 codigo_facultad = %s
             WHERE id_facultad = %s
-            RETURNING id_facultad;
         """
 
-        cursor.execute(
-            query,
-            (
-                facultad.nombre_facultad,
-                facultad.codigo_facultad,
-                id_facultad
-            )
+        valores = (
+            facultad.nombre_facultad,
+            facultad.codigo_facultad,
+            id_facultad
         )
 
-        actualizado = cursor.fetchone()
+        cursor.execute(sql, valores)
 
-        conn.commit()
-        conn.close()
+        cn.commit()
 
-        return actualizado is not None
+        filas_afectadas = cursor.rowcount
+
+        cursor.close()
+        cn.close()
+
+        return filas_afectadas
+
 
     def eliminarFacultad(self, id_facultad: int):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
 
-        cursor.execute("""
+        cn = get_connection()
+        cursor = cn.cursor()
+
+        sql = """
             DELETE FROM facultad
             WHERE id_facultad = %s
-            RETURNING id_facultad;
-        """, (id_facultad,))
+        """
 
-        eliminado = cursor.fetchone()
+        cursor.execute(sql, (id_facultad,))
 
-        conn.commit()
-        conn.close()
+        cn.commit()
 
-        return eliminado is not None
+        filas_afectadas = cursor.rowcount
+
+        cursor.close()
+        cn.close()
+
+        return filas_afectadas

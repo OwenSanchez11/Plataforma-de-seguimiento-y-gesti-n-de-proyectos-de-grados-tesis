@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.models.facultad import FacultadCrear, ActualizarFacultad
+from app.models.facultad import Facultad
 from app.repositories.facultad_repo import FacultadRepository
 
 
@@ -14,6 +14,7 @@ repo = FacultadRepository()
 
 @router.get("/")
 def obtener_facultades():
+
     return repo.obtenerFacultades()
 
 
@@ -32,7 +33,7 @@ def obtener_facultad_por_id(id_facultad: int):
 
 
 @router.post("/")
-def crear_facultad(facultad: FacultadCrear):
+def crear_facultad(facultad: Facultad):
 
     return repo.crearFacultad(facultad)
 
@@ -40,15 +41,15 @@ def crear_facultad(facultad: FacultadCrear):
 @router.put("/{id_facultad}")
 def actualizar_facultad(
     id_facultad: int,
-    facultad: ActualizarFacultad
+    facultad: Facultad
 ):
 
-    actualizado = repo.actualizarFacultad(
+    filas_afectadas = repo.actualizarFacultad(
         id_facultad,
         facultad
     )
 
-    if not actualizado:
+    if filas_afectadas == 0:
         raise HTTPException(
             status_code=404,
             detail="Facultad no encontrada"
@@ -62,9 +63,9 @@ def actualizar_facultad(
 @router.delete("/{id_facultad}")
 def eliminar_facultad(id_facultad: int):
 
-    eliminado = repo.eliminarFacultad(id_facultad)
+    filas_afectadas = repo.eliminarFacultad(id_facultad)
 
-    if not eliminado:
+    if filas_afectadas == 0:
         raise HTTPException(
             status_code=404,
             detail="Facultad no encontrada"

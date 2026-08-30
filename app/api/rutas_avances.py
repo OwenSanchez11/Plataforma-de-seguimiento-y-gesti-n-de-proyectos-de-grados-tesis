@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.models.avances import CrearAvances
-from app.models.avances import ActualizarAvances
+from app.models.avances import Avances
 
 from app.repositories.avances_repo import AvancesRepository
 
@@ -16,38 +15,39 @@ repo = AvancesRepository()
 
 @router.get("/")
 def obtener_avances():
-    return repo.obtenerHitos()
+
+    return repo.obtenerAvances()
 
 
-@router.get("/{id_hito}")
+@router.get("/{id_avances}")
 def obtener_avances_por_id(id_avances: int):
 
-    hito = repo.obtenerHitoPorId(id_avances)
+    avances = repo.obtenerAvancesPorId(id_avances)
 
-    if not hito:
+    if not avances:
         raise HTTPException(
             status_code=404,
-            detail="Hito no encontrado"
+            detail="Avances no encontrado"
         )
 
-    return hito
+    return avances
 
 
 @router.post("/")
-def crear_avances(avances: CrearAvances):
+def crear_avances(avances: Avances):
 
-    nuevo_id_avances = repo.crearHito(avances)
+    nuevo_id_avances = repo.crearAvances(avances)
 
     return {
-        "Mensaje": "Hito registrado exitosamente",
-        "id": nuevo_id_avances
+        "Mensaje": "Avances registrado exitosamente",
+        "id_avances": nuevo_id_avances
     }
 
 
 @router.put("/{id_avances}")
-def actualizar_hito(
+def actualizar_avances(
     id_avances: int,
-    avances: ActualizarAvances
+    avances: Avances
 ):
 
     actualizado = repo.actualizarAvances(
@@ -58,16 +58,15 @@ def actualizar_hito(
     if not actualizado:
         raise HTTPException(
             status_code=404,
-            detail="Hito no encontrado"
+            detail="Avances no encontrado"
         )
 
     return {
-        "Mensaje": "Avances actualizado exitosamente",
-        "actualizado": actualizado
+        "Mensaje": "Avances actualizado exitosamente"
     }
 
 
-@router.delete("/{id_hito}")
+@router.delete("/{id_avances}")
 def eliminar_avances(id_avances: int):
 
     eliminado = repo.eliminarAvances(id_avances)

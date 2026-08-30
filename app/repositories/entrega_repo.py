@@ -1,14 +1,15 @@
 from app.core.database import Database
 from app.models.entrega import Entrega
-from app.models.entrega import CrearEntrega
-from app.models.entrega import ActualizarEntrega
 
 
 class EntregaRepository:
+
     def __init__(self):
         self.db = Database()
 
+
     def obtenerEntregas(self):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -24,7 +25,9 @@ class EntregaRepository:
 
         return entregas
 
+
     def obtenerEntregaPorId(self, id_entrega: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -40,7 +43,9 @@ class EntregaRepository:
 
         return entrega
 
-    def crearEntrega(self, entrega: CrearEntrega):
+
+    def crearEntrega(self, entrega: Entrega):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -74,15 +79,18 @@ class EntregaRepository:
         id_entrega = cursor.fetchone()["id_entrega"]
 
         conn.commit()
+
         conn.close()
 
         return id_entrega
 
+
     def actualizarEntrega(
         self,
         id_entrega: int,
-        entrega: ActualizarEntrega
+        entrega: Entrega
     ):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -114,14 +122,17 @@ class EntregaRepository:
             )
         )
 
-        entregaActualizada = cursor.fetchone()
+        entrega_actualizada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
-        return entregaActualizada is not None
+        return entrega_actualizada is not None
+
 
     def eliminarEntrega(self, id_entrega: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -134,6 +145,7 @@ class EntregaRepository:
         eliminada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
         return eliminada is not None

@@ -1,13 +1,13 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
-class CarreraCrear(BaseModel):
-    id_facultad: int
-    nombre_carrera: str
-    codigo_carrera: str | None = None
+class Carrera(BaseModel):
 
+    id_carrera: Optional[int] = None
 
-class ActualizarCarrera(BaseModel):
-    id_facultad: int | None = None
-    nombre_carrera: str | None = None
-    codigo_carrera: str | None = None
+    id_facultad: Optional[int] = None
+
+    nombre_carrera: Optional[str] = None
+
+    codigo_carrera: Optional[str] = None

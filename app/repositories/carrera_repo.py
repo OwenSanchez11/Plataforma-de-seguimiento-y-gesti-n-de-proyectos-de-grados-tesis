@@ -1,13 +1,16 @@
 from app.core.database import Database
-from app.models.carrera import CarreraCrear, ActualizarCarrera
+from app.models.carrera import Carrera
 
 
 class CarreraRepository:
 
     def __init__(self):
+
         self.db = Database()
 
+
     def obtenerCarreras(self):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -23,7 +26,9 @@ class CarreraRepository:
 
         return carreras
 
+
     def obtenerCarreraPorId(self, id_carrera: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -39,7 +44,9 @@ class CarreraRepository:
 
         return carrera
 
-    def crearCarrera(self, carrera: CarreraCrear):
+
+    def crearCarrera(self, carrera: Carrera):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -65,6 +72,7 @@ class CarreraRepository:
         id_carrera = cursor.fetchone()["id_carrera"]
 
         conn.commit()
+
         conn.close()
 
         return {
@@ -72,11 +80,13 @@ class CarreraRepository:
             "id_carrera": id_carrera
         }
 
+
     def actualizarCarrera(
         self,
         id_carrera: int,
-        carrera: ActualizarCarrera
+        carrera: Carrera
     ):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -103,9 +113,11 @@ class CarreraRepository:
         carrera_actualizada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
         if carrera_actualizada is None:
+
             return {
                 "mensaje": "Carrera no encontrada"
             }
@@ -114,7 +126,9 @@ class CarreraRepository:
             "mensaje": "Carrera actualizada correctamente"
         }
 
+
     def eliminarCarrera(self, id_carrera: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -127,9 +141,11 @@ class CarreraRepository:
         eliminada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
         if eliminada is None:
+
             return {
                 "mensaje": "Carrera no encontrada"
             }

@@ -1,28 +1,18 @@
 from pydantic import BaseModel
+from typing import Optional
 from datetime import date
 
 
-class AsignacionCrear(BaseModel):
+class Asignacion(BaseModel):
 
-    id_trabajo_grado: int
+    id_asignacion: Optional[int] = None
 
-    id_usuario: int
+    id_trabajo_grado: Optional[int] = None
 
-    id_rol: int
+    id_usuario: Optional[int] = None
 
-    fecha_asignacion: date | None = None
+    id_rol: Optional[int] = None
 
-    estado: bool | None = True
+    fecha_asignacion: Optional[date] = None
 
-
-class ActualizarAsignacion(BaseModel):
-
-    id_trabajo_grado: int | None = None
-
-    id_usuario: int | None = None
-
-    id_rol: int | None = None
-
-    fecha_asignacion: date | None = None
-
-    estado: bool | None = None
+    estado: Optional[bool] = None

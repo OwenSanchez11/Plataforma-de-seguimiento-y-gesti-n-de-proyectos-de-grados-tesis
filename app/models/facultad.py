@@ -1,11 +1,9 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
-class FacultadCrear(BaseModel):
-    nombre_facultad: str
-    codigo_facultad: str | None = None
+class Facultad(BaseModel):
 
-
-class ActualizarFacultad(BaseModel):
-    nombre_facultad: str | None = None
-    codigo_facultad: str | None = None
+    id_facultad: Optional[int] = None
+    nombre_facultad: Optional[str] = None
+    codigo_facultad: Optional[str] = None

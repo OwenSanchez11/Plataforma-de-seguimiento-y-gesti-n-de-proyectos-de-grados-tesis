@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.models.asignacion import AsignacionCrear, ActualizarAsignacion
+from app.models.asignacion import Asignacion
 
 from app.repositories.asignacion_repo import AsignacionRepository
 
@@ -29,7 +29,7 @@ def obtener_asignacion_por_id(id_asignacion: int):
 
 
 @router.post("/")
-def crear_asignacion(asignacion: AsignacionCrear):
+def crear_asignacion(asignacion: Asignacion):
 
     return repo.crearAsignacion(asignacion)
 
@@ -39,11 +39,14 @@ def actualizar_asignacion(
 
     id_asignacion: int,
 
-    asignacion: ActualizarAsignacion
+    asignacion: Asignacion
 
 ):
 
-    return repo.actualizarAsignacion(id_asignacion, asignacion)
+    return repo.actualizarAsignacion(
+        id_asignacion,
+        asignacion
+    )
 
 
 @router.delete("/{id_asignacion}")
