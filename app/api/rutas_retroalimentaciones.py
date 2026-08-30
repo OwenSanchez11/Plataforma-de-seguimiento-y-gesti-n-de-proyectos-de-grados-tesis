@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.models.retroalimentaciones import CrearRetroalimentacion
-from app.models.retroalimentaciones import ActualizarRetroalimentacion
+from app.models.retroalimentaciones import Retroalimentacion
 from app.repositories.retroalimentacion_repo import RetroalimentacionesRepository
 
 router = APIRouter(prefix="/retroalimentaciones", tags=["Gestión de las retroalimentaciones dadas a cada entrega de los trabajos de grados del sistema"])
@@ -21,13 +20,13 @@ def obtener_retroalimentaciones_id(id_retroalimentacion: int):
 
 
 @router.post("/")
-def crear_retroalimentacion(retroalimentacion: CrearRetroalimentacion):
+def crear_retroalimentacion(retroalimentacion: Retroalimentacion):
     nueva_retroalimentacion = repo.crearRetroalimentacion(retroalimentacion)
     return {"Mensaje ": " retroalimentacion registrada exitosamente", "id": nueva_retroalimentacion}
 
 
 @router.put("/{id_retroalimentacion}")
-def actualizar_retroalimentacion(id_retroalimentacion: int, retroalimentacion: ActualizarRetroalimentacion):
+def actualizar_retroalimentacion(id_retroalimentacion: int, retroalimentacion: Retroalimentacion):
     actualizarRetroalimentacion = repo.actualizarRetroalimentacion(id_retroalimentacion, retroalimentacion)
     
     return {

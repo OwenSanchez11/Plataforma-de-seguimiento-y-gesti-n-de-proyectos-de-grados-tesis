@@ -4,20 +4,9 @@ from datetime import date
 
 class Retroalimentacion(BaseModel):
     id_retroalimentacion: Optional[int] = None
-    id_entrega: int
-    id_profesor: int
-    comentario: str
-    estado: str
-    fecha_creacion: date
+    id_entrega: Optional[int] = None
+    id_usuario: Optional[int] = None
+    comentario: Optional[str] = None
+    estado: Optional[str] = None
+    fecha_creacion: Optional[date] = None
     
-class CrearRetroalimentacion(BaseModel):
-    id_entrega: int
-    id_profesor: int
-    comentario: str
-    estado: str
-    fecha_creacion: date
-    
-class ActualizarRetroalimentacion(BaseModel):
-    comentario: str
-    estado: str
-    fecha_creacion: date

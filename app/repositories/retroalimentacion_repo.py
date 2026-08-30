@@ -1,7 +1,6 @@
 from app.core.database import Database
-from app.models.retroalimentaciones import CrearRetroalimentacion
 from app.models.retroalimentaciones import Retroalimentacion
-from app.models.retroalimentaciones import ActualizarRetroalimentacion
+
 
 
 
@@ -40,14 +39,14 @@ class RetroalimentacionesRepository:
         
         return retroalimentacion
     
-    def crearRetroalimentacion(self, retroalimentacion: CrearRetroalimentacion):
+    def crearRetroalimentacion(self, retroalimentacion: Retroalimentacion):
         conn = self.db.getConnection()
         cursor = conn.cursor()
         
         query = """
             INSERT INTO retroalimentaciones (
             id_entrega,
-            id_profesor,
+            id_usuario,
             comentario,
             estado,
             fecha_creacion
@@ -59,7 +58,7 @@ class RetroalimentacionesRepository:
             query,
             (
                 retroalimentacion.id_entrega,
-                retroalimentacion.id_profesor,
+                retroalimentacion.id_usuario,
                 retroalimentacion.comentario,
                 retroalimentacion.estado,
                 retroalimentacion.fecha_creacion
@@ -74,7 +73,7 @@ class RetroalimentacionesRepository:
         return id_retroalimentacion
     
     
-    def actualizarRetroalimentacion(self, id_retroalimentacion: int, retroalimentacion: ActualizarRetroalimentacion):
+    def actualizarRetroalimentacion(self, id_retroalimentacion: int, retroalimentacion: Retroalimentacion):
         conn = self.db.getConnection()
         cursor = conn.cursor()
         
