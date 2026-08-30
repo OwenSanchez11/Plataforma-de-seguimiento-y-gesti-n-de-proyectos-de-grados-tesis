@@ -1,4 +1,5 @@
 myenv/
+node_modules/
 __pycache__/
 .env
 DB/

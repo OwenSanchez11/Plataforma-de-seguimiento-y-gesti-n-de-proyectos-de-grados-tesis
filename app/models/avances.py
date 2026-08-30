@@ -3,8 +3,8 @@ from typing import Optional
 from datetime import date
 
 
-class Hito(BaseModel):
-    id_hito: Optional[int] = None
+class Avances(BaseModel):
+    id_avances: Optional[int] = None
     id_trabajo_grado: int
     titulo: str
     descripcion: Optional[str] = None
@@ -13,7 +13,7 @@ class Hito(BaseModel):
     estado: str
 
 
-class CrearHito(BaseModel):
+class CrearAvances(BaseModel):
     id_trabajo_grado: int
     titulo: str
     descripcion: Optional[str] = None
@@ -22,7 +22,7 @@ class CrearHito(BaseModel):
     estado: str
 
 
-class ActualizarHito(BaseModel):
+class ActualizarAvances(BaseModel):
     id_trabajo_grado: int
     titulo: str
     descripcion: Optional[str] = None

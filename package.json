@@ -1,0 +1,26 @@
+{
+  "name": "plataforma-de-seguimiento-y-gesti-n-de-proyectos-de-grados-tesis",
+  "version": "1.0.0",
+  "description": "API REST construida con **FastAPI** para centralizar el seguimiento de trabajos de grado de la universidad. El sistema permite registrar usuarios, roles, trabajos de grado, asignaciones de estudiantes, directores y jurados, ademas de hitos, entregas y retroalimentaciones.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OwenSanchez11/Plataforma-de-seguimiento-y-gesti-n-de-proyectos-de-grados-tesis.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/OwenSanchez11/Plataforma-de-seguimiento-y-gesti-n-de-proyectos-de-grados-tesis/issues"
+  },
+  "homepage": "https://github.com/OwenSanchez11/Plataforma-de-seguimiento-y-gesti-n-de-proyectos-de-grados-tesis#readme",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
