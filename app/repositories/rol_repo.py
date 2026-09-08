@@ -82,7 +82,7 @@ class RolRepository:
                 "id_rol": id_rol
             }
 
-        except psycopg2.Error as e:
+        except Exception as e:
             print("Error al crear rol:", e)
             return {
                 "error": "No se pudo crear el rol"

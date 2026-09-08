@@ -25,7 +25,7 @@ class UsuarioRepository:
 
             return usuarios
 
-        except psycopg2.Error as e:
+        except Exception as e:
             print("Error al obtener usuarios:", e)
             return []
 
@@ -96,7 +96,7 @@ class UsuarioRepository:
                 "id_user": id_user
             }
 
-        except psycopg2.Error as e:
+        except Exception as e:
             print("Error al crear usuario:", e)
             return {
                 "error": "No se pudo crear el usuario"

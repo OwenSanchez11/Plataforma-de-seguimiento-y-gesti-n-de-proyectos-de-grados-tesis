@@ -1,8 +1,7 @@
 import psycopg2
 from app.core.database import Database
 from app.models.equipo_trabajo import (
-    EquipoTrabajoCrear,
-    ActualizarEquipoTrabajo
+    EquipoTrabajo
 )
 
 
@@ -37,10 +36,10 @@ class EquipoTrabajoRepository:
 
     def obtenerEquipoTrabajoPorId(
         self,
-        id_trabajo_grado: int,
-        id_usuario: int,
-        id_rol_proyecto: int
+        id_equipo: int,
     ):
+        conn = None
+        cursor = None
 
         try:
             conn = self.db.getConnection()
@@ -49,18 +48,12 @@ class EquipoTrabajoRepository:
             cursor.execute("""
                 SELECT *
                 FROM equipo_trabajo
-                WHERE id_trabajo_grado = %s
-                  AND id_usuario = %s
-                  AND id_rol_proyecto = %s
+                WHERE id_equipo = %s
             """, (
-                id_trabajo_grado,
-                id_usuario,
-                id_rol_proyecto
+                id_equipo,
             ))
 
             equipo = cursor.fetchone()
-
-            conn.close()
 
             return equipo
 
@@ -70,7 +63,7 @@ class EquipoTrabajoRepository:
 
     def crearEquipoTrabajo(
         self,
-        equipo: EquipoTrabajoCrear
+        equipo: EquipoTrabajo
     ):
 
         try:
@@ -96,14 +89,7 @@ class EquipoTrabajoRepository:
                     %s,
                     %s
                 )
-                RETURNING
-                    id_trabajo_grado,
-                    id_usuario,
-                    id_rol_proyecto,
-                    observaciones,
-                    fecha_asignacion,
-                    fecha_finalizacion,
-                    estado
+                RETURNING id_equipo;
             """, (
                 equipo.id_trabajo_grado,
                 equipo.id_usuario,
@@ -114,7 +100,7 @@ class EquipoTrabajoRepository:
                 equipo.estado
             ))
 
-            resultado = cursor.fetchone()
+            resultado = cursor.fetchone()["id_equipo"]
 
             conn.commit()
             conn.close()
@@ -127,11 +113,11 @@ class EquipoTrabajoRepository:
 
     def actualizarEquipoTrabajo(
         self,
-        id_trabajo_grado: int,
-        id_usuario: int,
-        id_rol_proyecto: int,
-        equipo: ActualizarEquipoTrabajo
+        id_equipo: int,
+        equipo: EquipoTrabajo
     ):
+        conn = None
+        cursor = None
 
         try:
             conn = self.db.getConnection()
@@ -147,10 +133,9 @@ class EquipoTrabajoRepository:
                     fecha_asignacion = COALESCE(%s, fecha_asignacion),
                     fecha_finalizacion = COALESCE(%s, fecha_finalizacion),
                     estado = COALESCE(%s, estado)
-                WHERE id_trabajo_grado = %s
-                  AND id_usuario = %s
-                  AND id_rol_proyecto = %s
+                WHERE id_equipo = %s
                 RETURNING
+                    id_equipo,
                     id_trabajo_grado,
                     id_usuario,
                     id_rol_proyecto,
@@ -166,28 +151,29 @@ class EquipoTrabajoRepository:
                 equipo.fecha_asignacion,
                 equipo.fecha_finalizacion,
                 equipo.estado,
-                id_trabajo_grado,
-                id_usuario,
-                id_rol_proyecto
+                id_equipo
             ))
 
             actualizado = cursor.fetchone()
 
             conn.commit()
-            conn.close()
 
             return actualizado
 
         except psycopg2.Error as e:
+            if conn:
+                conn.rollback()
+
             print("Error al actualizar equipo de trabajo:", e)
             return None
 
+
     def eliminarEquipoTrabajo(
         self,
-        id_trabajo_grado: int,
-        id_usuario: int,
-        id_rol_proyecto: int
+        id_equipo: int
     ):
+        conn = None
+        cursor = None
 
         try:
             conn = self.db.getConnection()
@@ -195,26 +181,28 @@ class EquipoTrabajoRepository:
 
             cursor.execute("""
                 DELETE FROM equipo_trabajo
-                WHERE id_trabajo_grado = %s
-                  AND id_usuario = %s
-                  AND id_rol_proyecto = %s
-                RETURNING
-                    id_trabajo_grado,
-                    id_usuario,
-                    id_rol_proyecto
+                WHERE id_equipo = %s
+                RETURNING id_equipo
             """, (
-                id_trabajo_grado,
-                id_usuario,
-                id_rol_proyecto
+                id_equipo,
             ))
 
             eliminado = cursor.fetchone()
 
             conn.commit()
-            conn.close()
 
             return eliminado
 
         except psycopg2.Error as e:
+            if conn:
+                conn.rollback()
+
             print("Error al eliminar equipo de trabajo:", e)
             return None
+
+        finally:
+            if cursor:
+                cursor.close()
+
+            if conn:
+                conn.close()
