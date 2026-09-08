@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.models.modulo_rol import ModuloRol, ActualizarModuloRol
+from app.models.modulo_rol import ModuloRol
 from app.repositories.modulo_rol_repo import ModuloRolRepository
 
 
@@ -41,23 +41,23 @@ def crear_modulo_rol(modulo_rol: ModuloRol):
 @router.put("/{id_modulo_rol}")
 def actualizar_modulo_rol(
     id_modulo_rol: int,
-    modulo_rol: ActualizarModuloRol
+    modulo_rol: ModuloRol
 ):
 
-    actualizado = repo.actualizarModuloRol(
-        id_modulo_rol,
-        modulo_rol
-    )
-
-    if actualizado is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Módulo por rol no encontrado"
+        actualizado = repo.actualizarModuloRol(
+            id_modulo_rol,
+            modulo_rol
         )
 
-    return {
-        "mensaje": "Módulo por rol actualizado exitosamente"
-    }
+        if actualizado is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Módulo por rol no encontrado"
+            )
+
+        return {
+            "mensaje": "Módulo por rol actualizado exitosamente"
+        }
 
 
 @router.delete("/{id_modulo_rol}")

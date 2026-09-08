@@ -1,6 +1,6 @@
 import psycopg2
 from app.core.database import Database
-from app.models.modulo_rol import ModuloRol, ActualizarModuloRol
+from app.models.modulo_rol import ModuloRol
 
 
 class ModuloRolRepository:
@@ -94,7 +94,7 @@ class ModuloRolRepository:
     def actualizarModuloRol(
         self,
         id_modulo_rol: int,
-        modulo_rol: ActualizarModuloRol
+        modulo_rol: ModuloRol
     ):
 
         try:
@@ -132,7 +132,7 @@ class ModuloRolRepository:
 
             return actualizado
 
-        except psycopg2.Error as e:
+        except psycopg2.errors.UniqueViolation:
             print("Error al actualizar módulo por rol:", e)
             return None
 
