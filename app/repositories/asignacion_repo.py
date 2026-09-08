@@ -7,16 +7,16 @@ class AsignacionRepository:
     def __init__(self):
         self.db = Database()
 
-
     def obtenerAsignaciones(self):
-
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
         cursor.execute("""
             SELECT *
-            FROM asignacion
-            ORDER BY id_asignacion ASC
+            FROM equipo_trabajo
+            ORDER BY id_trabajo_grado ASC,
+                     id_usuario ASC,
+                     id_rol_proyecto ASC
         """)
 
         asignaciones = cursor.fetchall()
@@ -25,17 +25,26 @@ class AsignacionRepository:
 
         return asignaciones
 
-
-    def obtenerAsignacionPorId(self, id_asignacion: int):
-
+    def obtenerAsignacionPorId(
+        self,
+        id_trabajo_grado: int,
+        id_usuario: int,
+        id_rol_proyecto: int
+    ):
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
         cursor.execute("""
             SELECT *
-            FROM asignacion
-            WHERE id_asignacion = %s;
-        """, (id_asignacion,))
+            FROM equipo_trabajo
+            WHERE id_trabajo_grado = %s
+              AND id_usuario = %s
+              AND id_rol_proyecto = %s;
+        """, (
+            id_trabajo_grado,
+            id_usuario,
+            id_rol_proyecto
+        ))
 
         asignacion = cursor.fetchone()
 
@@ -43,28 +52,33 @@ class AsignacionRepository:
 
         return asignacion
 
-
     def crearAsignacion(self, asignacion: Asignacion):
-
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
         query = """
-            INSERT INTO asignacion (
+            INSERT INTO equipo_trabajo (
                 id_trabajo_grado,
                 id_usuario,
-                id_rol,
+                id_rol_proyecto,
+                observaciones,
                 fecha_asignacion,
+                fecha_finalizacion,
                 estado
             )
             VALUES (
                 %s,
                 %s,
                 %s,
+                %s,
                 COALESCE(%s, CURRENT_DATE),
+                %s,
                 %s
             )
-            RETURNING id_asignacion;
+            RETURNING
+                id_trabajo_grado,
+                id_usuario,
+                id_rol_proyecto;
         """
 
         cursor.execute(
@@ -72,97 +86,100 @@ class AsignacionRepository:
             (
                 asignacion.id_trabajo_grado,
                 asignacion.id_usuario,
-                asignacion.id_rol,
+                asignacion.id_rol_proyecto,
+                asignacion.observaciones,
                 asignacion.fecha_asignacion,
+                asignacion.fecha_finalizacion,
                 asignacion.estado
             )
         )
 
-        id_asignacion = cursor.fetchone()["id_asignacion"]
+        resultado = cursor.fetchone()
 
         conn.commit()
-
         conn.close()
 
         return {
             "mensaje": "Asignación creada correctamente",
-            "id_asignacion": id_asignacion
+            "id_trabajo_grado": resultado["id_trabajo_grado"],
+            "id_usuario": resultado["id_usuario"],
+            "id_rol_proyecto": resultado["id_rol_proyecto"]
         }
-
 
     def actualizarAsignacion(
         self,
-        id_asignacion: int,
+        id_trabajo_grado: int,
+        id_usuario: int,
+        id_rol_proyecto: int,
         asignacion: Asignacion
     ):
-
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
         query = """
-            UPDATE asignacion
+            UPDATE equipo_trabajo
             SET
-                id_trabajo_grado = %s,
-                id_usuario = %s,
-                id_rol = %s,
+                observaciones = %s,
                 fecha_asignacion = %s,
-                estado = %s
-            WHERE id_asignacion = %s
-            RETURNING id_asignacion;
+                fecha_finalizacion = %s,
+                estado = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id_trabajo_grado = %s
+              AND id_usuario = %s
+              AND id_rol_proyecto = %s
+            RETURNING
+                id_trabajo_grado,
+                id_usuario,
+                id_rol_proyecto;
         """
 
         cursor.execute(
             query,
             (
-                asignacion.id_trabajo_grado,
-                asignacion.id_usuario,
-                asignacion.id_rol,
+                asignacion.observaciones,
                 asignacion.fecha_asignacion,
+                asignacion.fecha_finalizacion,
                 asignacion.estado,
-                id_asignacion
+                id_trabajo_grado,
+                id_usuario,
+                id_rol_proyecto
             )
         )
 
         asignacion_actualizada = cursor.fetchone()
 
         conn.commit()
-
         conn.close()
 
-        if asignacion_actualizada is None:
+        return asignacion_actualizada is not None
 
-            return {
-                "mensaje": "Asignación no encontrada"
-            }
-
-        return {
-            "mensaje": "Asignación actualizada correctamente"
-        }
-
-
-    def eliminarAsignacion(self, id_asignacion: int):
-
+    def eliminarAsignacion(
+        self,
+        id_trabajo_grado: int,
+        id_usuario: int,
+        id_rol_proyecto: int
+    ):
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
         cursor.execute("""
-            DELETE FROM asignacion
-            WHERE id_asignacion = %s
-            RETURNING id_asignacion;
-        """, (id_asignacion,))
+            DELETE FROM equipo_trabajo
+            WHERE id_trabajo_grado = %s
+              AND id_usuario = %s
+              AND id_rol_proyecto = %s
+            RETURNING
+                id_trabajo_grado,
+                id_usuario,
+                id_rol_proyecto;
+        """, (
+            id_trabajo_grado,
+            id_usuario,
+            id_rol_proyecto
+        ))
 
         eliminada = cursor.fetchone()
 
         conn.commit()
-
         conn.close()
 
-        if eliminada is None:
-
-            return {
-                "mensaje": "Asignación no encontrada"
-            }
-
-        return {
-            "mensaje": "Asignación eliminada correctamente"
-        }
+        return eliminada is not None

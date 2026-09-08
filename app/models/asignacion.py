@@ -4,15 +4,10 @@ from datetime import date
 
 
 class Asignacion(BaseModel):
-
-    id_asignacion: Optional[int] = None
-
-    id_trabajo_grado: Optional[int] = None
-
-    id_usuario: Optional[int] = None
-
-    id_rol: Optional[int] = None
-
+    id_trabajo_grado: int
+    id_usuario: int
+    id_rol_proyecto: int
+    observaciones: Optional[str] = None
     fecha_asignacion: Optional[date] = None
-
-    estado: Optional[bool] = None
+    fecha_finalizacion: Optional[date] = None
+    estado: Optional[bool] = True
