@@ -19,64 +19,64 @@ def obtener_avances():
     return repo.obtenerAvances()
 
 
-@router.get("/{id_avances}")
-def obtener_avances_por_id(id_avances: int):
+@router.get("/{id_avance}")
+def obtener_avance_por_id(id_avance: int):
 
-    avances = repo.obtenerAvancesPorId(id_avances)
+    avance = repo.obtenerAvancesPorId(id_avance)
 
-    if not avances:
+    if not avance:
         raise HTTPException(
             status_code=404,
-            detail="Avances no encontrado"
+            detail="Avance no encontrado"
         )
 
-    return avances
+    return avance
 
 
 @router.post("/")
-def crear_avances(avances: Avances):
+def crear_avance(avance: Avances):
 
-    nuevo_id_avances = repo.crearAvances(avances)
+    nuevo_id_avance = repo.crearAvances(avance)
 
     return {
-        "Mensaje": "Avances registrado exitosamente",
-        "id_avances": nuevo_id_avances
+        "Mensaje": "Avance registrado exitosamente",
+        "id_avance": nuevo_id_avance
     }
 
 
-@router.put("/{id_avances}")
-def actualizar_avances(
-    id_avances: int,
-    avances: Avances
+@router.put("/{id_avance}")
+def actualizar_avance(
+    id_avance: int,
+    avance: Avances
 ):
 
     actualizado = repo.actualizarAvances(
-        id_avances,
-        avances
+        id_avance,
+        avance
     )
 
     if not actualizado:
         raise HTTPException(
             status_code=404,
-            detail="Avances no encontrado"
+            detail="Avance no encontrado"
         )
 
     return {
-        "Mensaje": "Avances actualizado exitosamente"
+        "Mensaje": "Avance actualizado exitosamente"
     }
 
 
-@router.delete("/{id_avances}")
-def eliminar_avances(id_avances: int):
+@router.delete("/{id_avance}")
+def eliminar_avance(id_avance: int):
 
-    eliminado = repo.eliminarAvances(id_avances)
+    eliminado = repo.eliminarAvances(id_avance)
 
     if not eliminado:
         raise HTTPException(
             status_code=404,
-            detail="Avances no encontrado"
+            detail="Avance no encontrado"
         )
 
     return {
-        "Mensaje": "Avances eliminado correctamente"
+        "Mensaje": "Avance eliminado correctamente"
     }

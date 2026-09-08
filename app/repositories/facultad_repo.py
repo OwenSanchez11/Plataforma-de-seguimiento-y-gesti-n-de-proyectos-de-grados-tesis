@@ -7,7 +7,9 @@ class FacultadRepository:
     def __init__(self):
         self.db = Database()
 
+
     def obtenerFacultades(self):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -23,7 +25,9 @@ class FacultadRepository:
 
         return facultades
 
+
     def obtenerFacultadPorId(self, id_facultad: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -39,16 +43,19 @@ class FacultadRepository:
 
         return facultad
 
+
     def crearFacultad(self, facultad: Facultad):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
         query = """
             INSERT INTO facultad (
                 nombre_facultad,
-                codigo_facultad
+                codigo_facultad,
+                estado
             )
-            VALUES (%s, %s)
+            VALUES (%s, %s, %s)
             RETURNING id_facultad;
         """
 
@@ -56,13 +63,15 @@ class FacultadRepository:
             query,
             (
                 facultad.nombre_facultad,
-                facultad.codigo_facultad
+                facultad.codigo_facultad,
+                facultad.estado
             )
         )
 
         id_facultad = cursor.fetchone()["id_facultad"]
 
         conn.commit()
+
         conn.close()
 
         return {
@@ -70,11 +79,13 @@ class FacultadRepository:
             "id_facultad": id_facultad
         }
 
+
     def actualizarFacultad(
         self,
         id_facultad: int,
         facultad: Facultad
     ):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -82,7 +93,9 @@ class FacultadRepository:
             UPDATE facultad
             SET
                 nombre_facultad = %s,
-                codigo_facultad = %s
+                codigo_facultad = %s,
+                estado = %s,
+                updated_at = CURRENT_TIMESTAMP
             WHERE id_facultad = %s
             RETURNING id_facultad;
         """
@@ -92,6 +105,7 @@ class FacultadRepository:
             (
                 facultad.nombre_facultad,
                 facultad.codigo_facultad,
+                facultad.estado,
                 id_facultad
             )
         )
@@ -99,18 +113,14 @@ class FacultadRepository:
         facultad_actualizada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
-        if facultad_actualizada is None:
-            return {
-                "mensaje": "Facultad no encontrada"
-            }
+        return facultad_actualizada is not None
 
-        return {
-            "mensaje": "Facultad actualizada correctamente"
-        }
 
     def eliminarFacultad(self, id_facultad: int):
+
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -123,13 +133,7 @@ class FacultadRepository:
         eliminada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
-        if eliminada is None:
-            return {
-                "mensaje": "Facultad no encontrada"
-            }
-
-        return {
-            "mensaje": "Facultad eliminada correctamente"
-        }
+        return eliminada is not None

@@ -1,51 +1,152 @@
-from fastapi import APIRouter, HTTPException
-from app.models.usuario import Usuario
+from app.core.database import Database
 from app.models.modulos_por_rol import Modulo_rol
-from app.repositories.modulos_rol_repo import ModuloPorRolRepository
-
-router = APIRouter(prefix="/modulos_rol", tags=["Gestión de modulos por rol"])
-repo = ModuloPorRolRepository()
 
 
+class ModuloPorRolRepository:
 
-@router.get("/")
-def obtener_modulos_rol():
-    return repo.obtenerModuloRol()
-
-
-@router.get("/{id_modulo_rol}")
-def obtener_modulo_rol_por_id(id_modulo_rol: int):
-    modulo_rol = repo.obtenerModuloRolPorId(id_modulo_rol)
-    
-    if not modulo_rol: 
-        raise HTTPException(status_code= 404, detail= "Modulo por rol no encontrado")
-    return modulo_rol
+    def __init__(self):
+        self.db = Database()
 
 
+    def obtenerModuloRol(self):
 
-@router.post("/")
-def crear_modulo_por_rol(modulo: Modulo_rol):
-    nuevo_modulo_rol = repo.crearModuloPorRol(modulo)
-    return {
-        "Mensaje ": "Modulo por rol registrado exitosamente", "id": nuevo_modulo_rol
-    }
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT *
+            FROM modulo_rol
+            ORDER BY id_modulo_rol ASC
+        """)
+
+        modulo_rol = cursor.fetchall()
+
+        conn.close()
+
+        return modulo_rol
 
 
+    def obtenerModuloRolPorId(self, id_modulo_rol: int):
 
-@router.put("/{id_modulo_rol}")
-def actualizar_modulo_rol(id_modulo_rol: int, modulo: Modulo_rol):
-    actualizado = repo.actualizarModuloRol(id_modulo_rol, modulo)
-    
-    return {
-        "Mensaje": "Usuario actualizado exitosamente",
-        "actualizado": actualizado
-    }
-    
-    
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
 
-@router.delete("/{id_modulo_rol}")
-def eliminar_modulo_rol(id_modulo_rol: int):
-    exito = repo.eliminarModuloRol(id_modulo_rol)
-    if not exito:
-        raise HTTPException(status_code=404, detail="Modulo por rol no encontrado")
-    return {"Mensaje": "MOdulo por rol eliminado correctamente"}  
+        cursor.execute("""
+            SELECT *
+            FROM modulo_rol
+            WHERE id_modulo_rol = %s;
+        """, (id_modulo_rol,))
+
+        modulo_rol = cursor.fetchone()
+
+        conn.close()
+
+        return modulo_rol
+
+
+    def crearModuloPorRol(self, modulo: Modulo_rol):
+
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
+
+        query = """
+            INSERT INTO modulo_rol (
+                id_rol,
+                id_modulo,
+                puede_leer,
+                puede_crear,
+                puede_editar,
+                puede_eliminar,
+                estado
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id_modulo_rol;
+        """
+
+        cursor.execute(
+            query,
+            (
+                modulo.id_rol,
+                modulo.id_modulo,
+                modulo.puede_leer,
+                modulo.puede_crear,
+                modulo.puede_editar,
+                modulo.puede_eliminar,
+                modulo.estado
+            )
+        )
+
+        id_modulo_rol = cursor.fetchone()["id_modulo_rol"]
+
+        conn.commit()
+
+        conn.close()
+
+        return id_modulo_rol
+
+
+    def actualizarModuloRol(
+        self,
+        id_modulo_rol: int,
+        modulo_rol: Modulo_rol
+    ):
+
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
+
+        query = """
+            UPDATE modulo_rol
+            SET
+                id_rol = %s,
+                id_modulo = %s,
+                puede_leer = %s,
+                puede_crear = %s,
+                puede_editar = %s,
+                puede_eliminar = %s,
+                estado = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id_modulo_rol = %s
+            RETURNING id_modulo_rol;
+        """
+
+        cursor.execute(
+            query,
+            (
+                modulo_rol.id_rol,
+                modulo_rol.id_modulo,
+                modulo_rol.puede_leer,
+                modulo_rol.puede_crear,
+                modulo_rol.puede_editar,
+                modulo_rol.puede_eliminar,
+                modulo_rol.estado,
+                id_modulo_rol
+            )
+        )
+
+        actualizado = cursor.fetchone()
+
+        conn.commit()
+
+        conn.close()
+
+        return actualizado is not None
+
+
+    def eliminarModuloRol(self, id_modulo_rol: int):
+
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            DELETE FROM modulo_rol
+            WHERE id_modulo_rol = %s
+            RETURNING id_modulo_rol;
+        """, (id_modulo_rol,))
+
+        eliminado = cursor.fetchone()
+
+        conn.commit()
+
+        conn.close()
+
+        return eliminado is not None

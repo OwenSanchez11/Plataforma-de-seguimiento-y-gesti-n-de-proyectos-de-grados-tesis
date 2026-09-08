@@ -6,8 +6,10 @@ class Carrera(BaseModel):
 
     id_carrera: Optional[int] = None
 
-    id_facultad: Optional[int] = None
+    id_facultad: int
 
-    nombre_carrera: Optional[str] = None
+    nombre_carrera: str
 
     codigo_carrera: Optional[str] = None
+
+    estado: Optional[bool] = True

@@ -1,20 +1,32 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date
+from datetime import datetime
 
 
 class Avances(BaseModel):
 
-    id_avances: Optional[int] = None
+    id_avance: Optional[int] = None
 
-    id_trabajo_grado: Optional[int] = None
+    id_trabajo_grado: int
 
-    titulo: Optional[str] = None
+    titulo: str
+
+    subido_por: int
 
     descripcion: Optional[str] = None
 
-    fecha_inicio: Optional[date] = None
+    numero_version: Optional[int] = None
 
-    fecha_limite: Optional[date] = None
+    nombre_archivo: Optional[str] = None
 
-    estado: Optional[str] = None
+    ruta_archivo: Optional[str] = None
+
+    tamano_bytes: Optional[int] = None
+
+    fecha_inicio: Optional[datetime] = None
+
+    fecha_entrega: Optional[datetime] = None
+
+    fecha_limite: Optional[datetime] = None
+
+    estado: Optional[bool] = True

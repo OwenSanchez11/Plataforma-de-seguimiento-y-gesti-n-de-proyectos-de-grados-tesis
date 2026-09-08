@@ -6,11 +6,8 @@ from app.repositories.evaluacion_repo import EvaluacionRepository
 
 
 router = APIRouter(
-
     prefix="/evaluaciones",
-
     tags=["Gestión de evaluaciones"]
-
 )
 
 repo = EvaluacionRepository()
@@ -27,7 +24,7 @@ def obtener_evaluacion_por_id(id_evaluacion: int):
 
     evaluacion = repo.obtenerEvaluacionPorId(id_evaluacion)
 
-    if not evaluacion:
+    if evaluacion is None:
 
         raise HTTPException(
             status_code=404,
@@ -45,38 +42,39 @@ def crear_evaluacion(evaluacion: Evaluacion):
 
 @router.put("/{id_evaluacion}")
 def actualizar_evaluacion(
-
     id_evaluacion: int,
-
     evaluacion: Evaluacion
-
 ):
 
-    resultado = repo.actualizarEvaluacion(
+    actualizado = repo.actualizarEvaluacion(
         id_evaluacion,
         evaluacion
     )
 
-    if resultado.get("mensaje") == "Evaluación no encontrada":
+    if not actualizado:
 
         raise HTTPException(
             status_code=404,
             detail="Evaluación no encontrada"
         )
 
-    return resultado
+    return {
+        "mensaje": "Evaluación actualizada correctamente"
+    }
 
 
 @router.delete("/{id_evaluacion}")
 def eliminar_evaluacion(id_evaluacion: int):
 
-    resultado = repo.eliminarEvaluacion(id_evaluacion)
+    eliminado = repo.eliminarEvaluacion(id_evaluacion)
 
-    if resultado.get("mensaje") == "Evaluación no encontrada":
+    if not eliminado:
 
         raise HTTPException(
             status_code=404,
             detail="Evaluación no encontrada"
         )
 
-    return resultado
+    return {
+        "mensaje": "Evaluación eliminada correctamente"
+    }

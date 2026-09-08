@@ -5,12 +5,9 @@ from app.models.carrera import Carrera
 class CarreraRepository:
 
     def __init__(self):
-
         self.db = Database()
 
-
     def obtenerCarreras(self):
-
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -26,9 +23,7 @@ class CarreraRepository:
 
         return carreras
 
-
     def obtenerCarreraPorId(self, id_carrera: int):
-
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -44,9 +39,7 @@ class CarreraRepository:
 
         return carrera
 
-
     def crearCarrera(self, carrera: Carrera):
-
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -54,9 +47,10 @@ class CarreraRepository:
             INSERT INTO carrera (
                 id_facultad,
                 nombre_carrera,
-                codigo_carrera
+                codigo_carrera,
+                estado
             )
-            VALUES (%s, %s, %s)
+            VALUES (%s, %s, %s, %s)
             RETURNING id_carrera;
         """
 
@@ -65,14 +59,14 @@ class CarreraRepository:
             (
                 carrera.id_facultad,
                 carrera.nombre_carrera,
-                carrera.codigo_carrera
+                carrera.codigo_carrera,
+                carrera.estado
             )
         )
 
         id_carrera = cursor.fetchone()["id_carrera"]
 
         conn.commit()
-
         conn.close()
 
         return {
@@ -80,13 +74,11 @@ class CarreraRepository:
             "id_carrera": id_carrera
         }
 
-
     def actualizarCarrera(
         self,
         id_carrera: int,
         carrera: Carrera
     ):
-
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -95,7 +87,9 @@ class CarreraRepository:
             SET
                 id_facultad = %s,
                 nombre_carrera = %s,
-                codigo_carrera = %s
+                codigo_carrera = %s,
+                estado = %s,
+                updated_at = CURRENT_TIMESTAMP
             WHERE id_carrera = %s
             RETURNING id_carrera;
         """
@@ -106,6 +100,7 @@ class CarreraRepository:
                 carrera.id_facultad,
                 carrera.nombre_carrera,
                 carrera.codigo_carrera,
+                carrera.estado,
                 id_carrera
             )
         )
@@ -113,22 +108,11 @@ class CarreraRepository:
         carrera_actualizada = cursor.fetchone()
 
         conn.commit()
-
         conn.close()
 
-        if carrera_actualizada is None:
-
-            return {
-                "mensaje": "Carrera no encontrada"
-            }
-
-        return {
-            "mensaje": "Carrera actualizada correctamente"
-        }
-
+        return carrera_actualizada is not None
 
     def eliminarCarrera(self, id_carrera: int):
-
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -141,15 +125,6 @@ class CarreraRepository:
         eliminada = cursor.fetchone()
 
         conn.commit()
-
         conn.close()
 
-        if eliminada is None:
-
-            return {
-                "mensaje": "Carrera no encontrada"
-            }
-
-        return {
-            "mensaje": "Carrera eliminada correctamente"
-        }
+        return eliminada is not None

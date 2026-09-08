@@ -44,12 +44,12 @@ def actualizar_facultad(
     facultad: Facultad
 ):
 
-    filas_afectadas = repo.actualizarFacultad(
+    actualizado = repo.actualizarFacultad(
         id_facultad,
         facultad
     )
 
-    if filas_afectadas == 0:
+    if not actualizado:
         raise HTTPException(
             status_code=404,
             detail="Facultad no encontrada"
@@ -63,9 +63,9 @@ def actualizar_facultad(
 @router.delete("/{id_facultad}")
 def eliminar_facultad(id_facultad: int):
 
-    filas_afectadas = repo.eliminarFacultad(id_facultad)
+    eliminado = repo.eliminarFacultad(id_facultad)
 
-    if filas_afectadas == 0:
+    if not eliminado:
         raise HTTPException(
             status_code=404,
             detail="Facultad no encontrada"

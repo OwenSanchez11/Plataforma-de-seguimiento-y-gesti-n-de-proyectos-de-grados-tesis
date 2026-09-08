@@ -7,6 +7,7 @@ class EvaluacionRepository:
     def __init__(self):
         self.db = Database()
 
+
     def obtenerEvaluaciones(self):
 
         conn = self.db.getConnection()
@@ -23,6 +24,7 @@ class EvaluacionRepository:
         conn.close()
 
         return evaluaciones
+
 
     def obtenerEvaluacionPorId(self, id_evaluacion: int):
 
@@ -41,6 +43,7 @@ class EvaluacionRepository:
 
         return evaluacion
 
+
     def crearEvaluacion(self, evaluacion: Evaluacion):
 
         conn = self.db.getConnection()
@@ -53,7 +56,8 @@ class EvaluacionRepository:
                 nota,
                 veredicto,
                 observaciones,
-                fecha_evaluacion
+                fecha_evaluacion,
+                estado
             )
             VALUES (
                 %s,
@@ -61,7 +65,8 @@ class EvaluacionRepository:
                 %s,
                 %s,
                 %s,
-                COALESCE(%s, CURRENT_DATE)
+                COALESCE(%s, CURRENT_DATE),
+                %s
             )
             RETURNING id_evaluacion;
         """
@@ -74,19 +79,22 @@ class EvaluacionRepository:
                 evaluacion.nota,
                 evaluacion.veredicto,
                 evaluacion.observaciones,
-                evaluacion.fecha_evaluacion
+                evaluacion.fecha_evaluacion,
+                evaluacion.estado
             )
         )
 
         id_evaluacion = cursor.fetchone()["id_evaluacion"]
 
         conn.commit()
+
         conn.close()
 
         return {
             "mensaje": "Evaluación creada correctamente",
             "id_evaluacion": id_evaluacion
         }
+
 
     def actualizarEvaluacion(
         self,
@@ -105,7 +113,9 @@ class EvaluacionRepository:
                 nota = %s,
                 veredicto = %s,
                 observaciones = %s,
-                fecha_evaluacion = %s
+                fecha_evaluacion = %s,
+                estado = %s,
+                updated_at = CURRENT_TIMESTAMP
             WHERE id_evaluacion = %s
             RETURNING id_evaluacion;
         """
@@ -119,6 +129,7 @@ class EvaluacionRepository:
                 evaluacion.veredicto,
                 evaluacion.observaciones,
                 evaluacion.fecha_evaluacion,
+                evaluacion.estado,
                 id_evaluacion
             )
         )
@@ -126,16 +137,11 @@ class EvaluacionRepository:
         evaluacion_actualizada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
-        if evaluacion_actualizada is None:
-            return {
-                "mensaje": "Evaluación no encontrada"
-            }
+        return evaluacion_actualizada is not None
 
-        return {
-            "mensaje": "Evaluación actualizada correctamente"
-        }
 
     def eliminarEvaluacion(self, id_evaluacion: int):
 
@@ -151,13 +157,7 @@ class EvaluacionRepository:
         eliminada = cursor.fetchone()
 
         conn.commit()
+
         conn.close()
 
-        if eliminada is None:
-            return {
-                "mensaje": "Evaluación no encontrada"
-            }
-
-        return {
-            "mensaje": "Evaluación eliminada correctamente"
-        }
+        return eliminada is not None

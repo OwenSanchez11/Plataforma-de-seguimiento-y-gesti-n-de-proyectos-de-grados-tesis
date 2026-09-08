@@ -16,7 +16,7 @@ class AvancesRepository:
         cursor.execute("""
             SELECT *
             FROM avances
-            ORDER BY id_avances ASC
+            ORDER BY id_avance ASC
         """)
 
         avances = cursor.fetchall()
@@ -26,7 +26,7 @@ class AvancesRepository:
         return avances
 
 
-    def obtenerAvancesPorId(self, id_avances: int):
+    def obtenerAvancesPorId(self, id_avance: int):
 
         conn = self.db.getConnection()
         cursor = conn.cursor()
@@ -34,17 +34,17 @@ class AvancesRepository:
         cursor.execute("""
             SELECT *
             FROM avances
-            WHERE id_avances = %s;
-        """, (id_avances,))
+            WHERE id_avance = %s;
+        """, (id_avance,))
 
-        avances = cursor.fetchone()
+        avance = cursor.fetchone()
 
         conn.close()
 
-        return avances
+        return avance
 
 
-    def crearAvances(self, avances: Avances):
+    def crearAvances(self, avance: Avances):
 
         conn = self.db.getConnection()
         cursor = conn.cursor()
@@ -53,40 +53,55 @@ class AvancesRepository:
             INSERT INTO avances (
                 id_trabajo_grado,
                 titulo,
+                subido_por,
                 descripcion,
+                numero_version,
+                nombre_archivo,
+                ruta_archivo,
+                tamano_bytes,
                 fecha_inicio,
+                fecha_entrega,
                 fecha_limite,
                 estado
             )
-            VALUES (%s, %s, %s, %s, %s, %s)
-            RETURNING id_avances;
+            VALUES (
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s
+            )
+            RETURNING id_avance;
         """
 
         cursor.execute(
             query,
             (
-                avances.id_trabajo_grado,
-                avances.titulo,
-                avances.descripcion,
-                avances.fecha_inicio,
-                avances.fecha_limite,
-                avances.estado
+                avance.id_trabajo_grado,
+                avance.titulo,
+                avance.subido_por,
+                avance.descripcion,
+                avance.numero_version,
+                avance.nombre_archivo,
+                avance.ruta_archivo,
+                avance.tamano_bytes,
+                avance.fecha_inicio,
+                avance.fecha_entrega,
+                avance.fecha_limite,
+                avance.estado
             )
         )
 
-        id_avances = cursor.fetchone()["id_avances"]
+        id_avance = cursor.fetchone()["id_avance"]
 
         conn.commit()
 
         conn.close()
 
-        return id_avances
+        return id_avance
 
 
     def actualizarAvances(
         self,
-        id_avances: int,
-        avances: Avances
+        id_avance: int,
+        avance: Avances
     ):
 
         conn = self.db.getConnection()
@@ -97,46 +112,59 @@ class AvancesRepository:
             SET
                 id_trabajo_grado = %s,
                 titulo = %s,
+                subido_por = %s,
                 descripcion = %s,
+                numero_version = %s,
+                nombre_archivo = %s,
+                ruta_archivo = %s,
+                tamano_bytes = %s,
                 fecha_inicio = %s,
+                fecha_entrega = %s,
                 fecha_limite = %s,
-                estado = %s
-            WHERE id_avances = %s
-            RETURNING id_avances;
+                estado = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id_avance = %s
+            RETURNING id_avance;
         """
 
         cursor.execute(
             query,
             (
-                avances.id_trabajo_grado,
-                avances.titulo,
-                avances.descripcion,
-                avances.fecha_inicio,
-                avances.fecha_limite,
-                avances.estado,
-                id_avances
+                avance.id_trabajo_grado,
+                avance.titulo,
+                avance.subido_por,
+                avance.descripcion,
+                avance.numero_version,
+                avance.nombre_archivo,
+                avance.ruta_archivo,
+                avance.tamano_bytes,
+                avance.fecha_inicio,
+                avance.fecha_entrega,
+                avance.fecha_limite,
+                avance.estado,
+                id_avance
             )
         )
 
-        avances_actualizado = cursor.fetchone()
+        avance_actualizado = cursor.fetchone()
 
         conn.commit()
 
         conn.close()
 
-        return avances_actualizado is not None
+        return avance_actualizado is not None
 
 
-    def eliminarAvances(self, id_avances: int):
+    def eliminarAvances(self, id_avance: int):
 
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
         cursor.execute("""
             DELETE FROM avances
-            WHERE id_avances = %s
-            RETURNING id_avances;
-        """, (id_avances,))
+            WHERE id_avance = %s
+            RETURNING id_avance;
+        """, (id_avance,))
 
         eliminado = cursor.fetchone()
 

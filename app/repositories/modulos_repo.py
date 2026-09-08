@@ -2,28 +2,27 @@ from app.core.database import Database
 from app.models.modulo import Modulo
 
 
-class ModuloRepository: 
-    
-    def __init__(self): 
+class ModuloRepository:
+
+    def __init__(self):
         self.db = Database()
-        
-    def obtenerModulos(self): 
+
+    def obtenerModulos(self):
         conn = self.db.getConnection()
         cursor = conn.cursor()
-        
+
         cursor.execute("""
             SELECT *
             FROM modulos
             ORDER BY id_modulo ASC
         """)
-        
+
         modulos = cursor.fetchall()
-        
+
         conn.close()
-        
+
         return modulos
-    
-  
+
     def obtenerModuloId(self, id_modulo: int):
         conn = self.db.getConnection()
         cursor = conn.cursor()
@@ -39,12 +38,11 @@ class ModuloRepository:
         conn.close()
 
         return modulo
-    
-    
+
     def crearModulo(self, modulo: Modulo):
         conn = self.db.getConnection()
         cursor = conn.cursor()
-        
+
         query = """
             INSERT INTO modulos (
                 nombre_modulo,
@@ -53,39 +51,39 @@ class ModuloRepository:
             VALUES (%s, %s)
             RETURNING id_modulo;
         """
-        
+
         cursor.execute(
             query,
             (
                 modulo.nombre_modulo,
                 modulo.estado
             )
-        )        
-        
+        )
+
         id_modulo = cursor.fetchone()["id_modulo"]
-        
+
         conn.commit()
         conn.close()
-        
+
         return {
-            "mensaje": "Facultad creada correctamente",
-            "id_facultad": id_modulo
+            "mensaje": "Módulo creado correctamente",
+            "id_modulo": id_modulo
         }
-      
-      
+
     def actualizarModulo(self, id_modulo: int, modulo: Modulo):
         conn = self.db.getConnection()
         cursor = conn.cursor()
-        
+
         query = """
             UPDATE modulos
             SET
                 nombre_modulo = %s,
-                estado = %s
+                estado = %s,
+                updated_at = CURRENT_TIMESTAMP
             WHERE id_modulo = %s
             RETURNING id_modulo;
         """
-        
+
         cursor.execute(
             query,
             (
@@ -93,24 +91,16 @@ class ModuloRepository:
                 modulo.estado,
                 id_modulo
             )
-        ) 
-        
+        )
+
         modulo_actualizado = cursor.fetchone()
-        
+
         conn.commit()
         conn.close()
-        
-        if modulo_actualizado is None:
-            return {
-                "mensaje": "Modulo no encontrado"
-            }
-        
-        return {
-            "mensaje": "Modulo actualizado correctamente"
-        }
-        
-    
-    def eliminarModulo(self, id_modulo: int): 
+
+        return modulo_actualizado is not None
+
+    def eliminarModulo(self, id_modulo: int):
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
@@ -120,25 +110,9 @@ class ModuloRepository:
             RETURNING id_modulo;
         """, (id_modulo,))
 
-        eliminada = cursor.fetchone()
+        modulo_eliminado = cursor.fetchone()
 
         conn.commit()
         conn.close()
 
-        if eliminada is None:
-            return {
-                "mensaje": "Modulo no encontrada"
-            }
-
-        return {
-            "mensaje": "Modulo eliminada correctamente"
-        }
-
-          
-    
-    
-
-
-
-
-
+        return modulo_eliminado is not None
