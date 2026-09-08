@@ -1,14 +1,13 @@
 from app.core.database import Database
-from app.models.modulos_por_rol import Modulo_rol
+from app.models.modulo_rol import ModuloRol, ActualizarModuloRol
 
 
-class ModuloPorRolRepository:
+class ModuloRolRepository:
 
     def __init__(self):
         self.db = Database()
 
-
-    def obtenerModuloRol(self):
+    def obtenerModulosRol(self):
 
         conn = self.db.getConnection()
         cursor = conn.cursor()
@@ -19,12 +18,11 @@ class ModuloPorRolRepository:
             ORDER BY id_modulo_rol ASC
         """)
 
-        modulo_rol = cursor.fetchall()
+        modulos_rol = cursor.fetchall()
 
         conn.close()
 
-        return modulo_rol
-
+        return modulos_rol
 
     def obtenerModuloRolPorId(self, id_modulo_rol: int):
 
@@ -34,7 +32,7 @@ class ModuloPorRolRepository:
         cursor.execute("""
             SELECT *
             FROM modulo_rol
-            WHERE id_modulo_rol = %s;
+            WHERE id_modulo_rol = %s
         """, (id_modulo_rol,))
 
         modulo_rol = cursor.fetchone()
@@ -43,13 +41,12 @@ class ModuloPorRolRepository:
 
         return modulo_rol
 
-
-    def crearModuloPorRol(self, modulo: Modulo_rol):
+    def crearModuloRol(self, modulo_rol: ModuloRol):
 
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
-        query = """
+        cursor.execute("""
             INSERT INTO modulo_rol (
                 id_rol,
                 id_modulo,
@@ -60,77 +57,63 @@ class ModuloPorRolRepository:
                 estado
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING id_modulo_rol;
-        """
+            RETURNING id_modulo_rol
+        """, (
+            modulo_rol.id_rol,
+            modulo_rol.id_modulo,
+            modulo_rol.puede_leer,
+            modulo_rol.puede_crear,
+            modulo_rol.puede_editar,
+            modulo_rol.puede_eliminar,
+            modulo_rol.estado
+        ))
 
-        cursor.execute(
-            query,
-            (
-                modulo.id_rol,
-                modulo.id_modulo,
-                modulo.puede_leer,
-                modulo.puede_crear,
-                modulo.puede_editar,
-                modulo.puede_eliminar,
-                modulo.estado
-            )
-        )
-
-        id_modulo_rol = cursor.fetchone()["id_modulo_rol"]
+        resultado = cursor.fetchone()
 
         conn.commit()
-
         conn.close()
 
-        return id_modulo_rol
-
+        return resultado
 
     def actualizarModuloRol(
         self,
         id_modulo_rol: int,
-        modulo_rol: Modulo_rol
+        modulo_rol: ActualizarModuloRol
     ):
 
         conn = self.db.getConnection()
         cursor = conn.cursor()
 
-        query = """
+        cursor.execute("""
             UPDATE modulo_rol
             SET
-                id_rol = %s,
-                id_modulo = %s,
-                puede_leer = %s,
-                puede_crear = %s,
-                puede_editar = %s,
-                puede_eliminar = %s,
-                estado = %s,
+                id_rol = COALESCE(%s, id_rol),
+                id_modulo = COALESCE(%s, id_modulo),
+                puede_leer = COALESCE(%s, puede_leer),
+                puede_crear = COALESCE(%s, puede_crear),
+                puede_editar = COALESCE(%s, puede_editar),
+                puede_eliminar = COALESCE(%s, puede_eliminar),
+                estado = COALESCE(%s, estado),
                 updated_at = CURRENT_TIMESTAMP
             WHERE id_modulo_rol = %s
-            RETURNING id_modulo_rol;
-        """
-
-        cursor.execute(
-            query,
-            (
-                modulo_rol.id_rol,
-                modulo_rol.id_modulo,
-                modulo_rol.puede_leer,
-                modulo_rol.puede_crear,
-                modulo_rol.puede_editar,
-                modulo_rol.puede_eliminar,
-                modulo_rol.estado,
-                id_modulo_rol
-            )
-        )
+            RETURNING id_modulo_rol
+        """, (
+            modulo_rol.id_rol,
+            modulo_rol.id_modulo,
+            modulo_rol.puede_leer,
+            modulo_rol.puede_crear,
+            modulo_rol.puede_editar,
+            modulo_rol.puede_eliminar,
+            modulo_rol.estado,
+            id_modulo_rol
+        ))
 
         actualizado = cursor.fetchone()
 
         conn.commit()
-
         conn.close()
 
-        return actualizado is not None
-
+        return actualizado
 
     def eliminarModuloRol(self, id_modulo_rol: int):
 
@@ -140,13 +123,12 @@ class ModuloPorRolRepository:
         cursor.execute("""
             DELETE FROM modulo_rol
             WHERE id_modulo_rol = %s
-            RETURNING id_modulo_rol;
+            RETURNING id_modulo_rol
         """, (id_modulo_rol,))
 
         eliminado = cursor.fetchone()
 
         conn.commit()
-
         conn.close()
 
-        return eliminado is not None
+        return eliminado

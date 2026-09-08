@@ -8,22 +8,26 @@ class AsignacionRepository:
         self.db = Database()
 
     def obtenerAsignaciones(self):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM equipo_trabajo
-            ORDER BY id_trabajo_grado ASC,
-                     id_usuario ASC,
-                     id_rol_proyecto ASC
-        """)
+            cursor.execute("""
+                SELECT *
+                FROM equipo_trabajo
+                ORDER BY id_trabajo_grado ASC,
+                         id_usuario ASC,
+                         id_rol_proyecto ASC
+            """)
 
-        asignaciones = cursor.fetchall()
+            asignaciones = cursor.fetchall()
+            conn.close()
 
-        conn.close()
+            return asignaciones
 
-        return asignaciones
+        except Exception as e:
+            print(f"Error al obtener asignaciones: {e}")
+            return []
 
     def obtenerAsignacionPorId(
         self,
@@ -31,80 +35,92 @@ class AsignacionRepository:
         id_usuario: int,
         id_rol_proyecto: int
     ):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM equipo_trabajo
-            WHERE id_trabajo_grado = %s
-              AND id_usuario = %s
-              AND id_rol_proyecto = %s;
-        """, (
-            id_trabajo_grado,
-            id_usuario,
-            id_rol_proyecto
-        ))
+            cursor.execute("""
+                SELECT *
+                FROM equipo_trabajo
+                WHERE id_trabajo_grado = %s
+                  AND id_usuario = %s
+                  AND id_rol_proyecto = %s;
+            """, (
+                id_trabajo_grado,
+                id_usuario,
+                id_rol_proyecto
+            ))
 
-        asignacion = cursor.fetchone()
+            asignacion = cursor.fetchone()
+            conn.close()
 
-        conn.close()
+            return asignacion
 
-        return asignacion
+        except Exception as e:
+            print(f"Error al obtener la asignación: {e}")
+            return None
 
     def crearAsignacion(self, asignacion: Asignacion):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        query = """
-            INSERT INTO equipo_trabajo (
-                id_trabajo_grado,
-                id_usuario,
-                id_rol_proyecto,
-                observaciones,
-                fecha_asignacion,
-                fecha_finalizacion,
-                estado
+            query = """
+                INSERT INTO equipo_trabajo (
+                    id_trabajo_grado,
+                    id_usuario,
+                    id_rol_proyecto,
+                    observaciones,
+                    fecha_asignacion,
+                    fecha_finalizacion,
+                    estado
+                )
+                VALUES (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    COALESCE(%s, CURRENT_DATE),
+                    %s,
+                    %s
+                )
+                RETURNING
+                    id_trabajo_grado,
+                    id_usuario,
+                    id_rol_proyecto;
+            """
+
+            cursor.execute(
+                query,
+                (
+                    asignacion.id_trabajo_grado,
+                    asignacion.id_usuario,
+                    asignacion.id_rol_proyecto,
+                    asignacion.observaciones,
+                    asignacion.fecha_asignacion,
+                    asignacion.fecha_finalizacion,
+                    asignacion.estado
+                )
             )
-            VALUES (
-                %s,
-                %s,
-                %s,
-                %s,
-                COALESCE(%s, CURRENT_DATE),
-                %s,
-                %s
-            )
-            RETURNING
-                id_trabajo_grado,
-                id_usuario,
-                id_rol_proyecto;
-        """
 
-        cursor.execute(
-            query,
-            (
-                asignacion.id_trabajo_grado,
-                asignacion.id_usuario,
-                asignacion.id_rol_proyecto,
-                asignacion.observaciones,
-                asignacion.fecha_asignacion,
-                asignacion.fecha_finalizacion,
-                asignacion.estado
-            )
-        )
+            resultado = cursor.fetchone()
 
-        resultado = cursor.fetchone()
+            conn.commit()
+            conn.close()
 
-        conn.commit()
-        conn.close()
+            return {
+                "mensaje": "Asignación creada correctamente",
+                "id_trabajo_grado": resultado["id_trabajo_grado"],
+                "id_usuario": resultado["id_usuario"],
+                "id_rol_proyecto": resultado["id_rol_proyecto"]
+            }
 
-        return {
-            "mensaje": "Asignación creada correctamente",
-            "id_trabajo_grado": resultado["id_trabajo_grado"],
-            "id_usuario": resultado["id_usuario"],
-            "id_rol_proyecto": resultado["id_rol_proyecto"]
-        }
+        except Exception as e:
+            print(f"Error al crear la asignación: {e}")
+            return {
+                "mensaje": "Error al crear la asignación",
+                "error": str(e)
+            }
 
     def actualizarAsignacion(
         self,
@@ -113,45 +129,50 @@ class AsignacionRepository:
         id_rol_proyecto: int,
         asignacion: Asignacion
     ):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        query = """
-            UPDATE equipo_trabajo
-            SET
-                observaciones = %s,
-                fecha_asignacion = %s,
-                fecha_finalizacion = %s,
-                estado = %s,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id_trabajo_grado = %s
-              AND id_usuario = %s
-              AND id_rol_proyecto = %s
-            RETURNING
-                id_trabajo_grado,
-                id_usuario,
-                id_rol_proyecto;
-        """
+            query = """
+                UPDATE equipo_trabajo
+                SET
+                    observaciones = %s,
+                    fecha_asignacion = %s,
+                    fecha_finalizacion = %s,
+                    estado = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id_trabajo_grado = %s
+                  AND id_usuario = %s
+                  AND id_rol_proyecto = %s
+                RETURNING
+                    id_trabajo_grado,
+                    id_usuario,
+                    id_rol_proyecto;
+            """
 
-        cursor.execute(
-            query,
-            (
-                asignacion.observaciones,
-                asignacion.fecha_asignacion,
-                asignacion.fecha_finalizacion,
-                asignacion.estado,
-                id_trabajo_grado,
-                id_usuario,
-                id_rol_proyecto
+            cursor.execute(
+                query,
+                (
+                    asignacion.observaciones,
+                    asignacion.fecha_asignacion,
+                    asignacion.fecha_finalizacion,
+                    asignacion.estado,
+                    id_trabajo_grado,
+                    id_usuario,
+                    id_rol_proyecto
+                )
             )
-        )
 
-        asignacion_actualizada = cursor.fetchone()
+            asignacion_actualizada = cursor.fetchone()
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+            conn.close()
 
-        return asignacion_actualizada is not None
+            return asignacion_actualizada is not None
+
+        except Exception as e:
+            print(f"Error al actualizar la asignación: {e}")
+            return False
 
     def eliminarAsignacion(
         self,
@@ -159,27 +180,32 @@ class AsignacionRepository:
         id_usuario: int,
         id_rol_proyecto: int
     ):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            DELETE FROM equipo_trabajo
-            WHERE id_trabajo_grado = %s
-              AND id_usuario = %s
-              AND id_rol_proyecto = %s
-            RETURNING
+            cursor.execute("""
+                DELETE FROM equipo_trabajo
+                WHERE id_trabajo_grado = %s
+                  AND id_usuario = %s
+                  AND id_rol_proyecto = %s
+                RETURNING
+                    id_trabajo_grado,
+                    id_usuario,
+                    id_rol_proyecto;
+            """, (
                 id_trabajo_grado,
                 id_usuario,
-                id_rol_proyecto;
-        """, (
-            id_trabajo_grado,
-            id_usuario,
-            id_rol_proyecto
-        ))
+                id_rol_proyecto
+            ))
 
-        eliminada = cursor.fetchone()
+            eliminada = cursor.fetchone()
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+            conn.close()
 
-        return eliminada is not None
+            return eliminada is not None
+
+        except Exception as e:
+            print(f"Error al eliminar la asignación: {e}")
+            return False
