@@ -1,3 +1,4 @@
+import psycopg2
 from app.core.database import Database
 from app.models.retroalimentaciones import Retroalimentacion
 
@@ -8,126 +9,153 @@ class RetroalimentacionesRepository:
         self.db = Database()
 
     def obtenerRetroalimentacion(self):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM retroalimentaciones
-            ORDER BY id_retroalimentacion ASC
-        """)
+            cursor.execute("""
+                SELECT *
+                FROM retroalimentaciones
+                ORDER BY id_retroalimentacion ASC
+            """)
 
-        retroalimentaciones = cursor.fetchall()
+            retroalimentaciones = cursor.fetchall()
 
-        conn.close()
+            conn.close()
 
-        return retroalimentaciones
+            return retroalimentaciones
+
+        except psycopg2.Error as e:
+            print("Error al obtener retroalimentaciones:", e)
+            return []
 
     def obtenerRetroalimentacionPorId(self, id_retroalimentacion: int):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM retroalimentaciones
-            WHERE id_retroalimentacion = %s;
-        """, (id_retroalimentacion,))
+            cursor.execute("""
+                SELECT *
+                FROM retroalimentaciones
+                WHERE id_retroalimentacion = %s;
+            """, (id_retroalimentacion,))
 
-        retroalimentacion = cursor.fetchone()
+            retroalimentacion = cursor.fetchone()
 
-        conn.close()
+            conn.close()
 
-        return retroalimentacion
+            return retroalimentacion
+
+        except psycopg2.Error as e:
+            print("Error al obtener retroalimentación:", e)
+            return None
 
     def crearRetroalimentacion(
         self,
         retroalimentacion: Retroalimentacion
     ):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        query = """
-            INSERT INTO retroalimentaciones (
-                id_avance,
-                id_usuario,
-                comentario,
-                estado
+            query = """
+                INSERT INTO retroalimentaciones (
+                    id_avance,
+                    id_usuario,
+                    comentario,
+                    estado
+                )
+                VALUES (%s, %s, %s, %s)
+                RETURNING id_retroalimentacion;
+            """
+
+            cursor.execute(
+                query,
+                (
+                    retroalimentacion.id_avance,
+                    retroalimentacion.id_usuario,
+                    retroalimentacion.comentario,
+                    retroalimentacion.estado
+                )
             )
-            VALUES (%s, %s, %s, %s)
-            RETURNING id_retroalimentacion;
-        """
 
-        cursor.execute(
-            query,
-            (
-                retroalimentacion.id_avance,
-                retroalimentacion.id_usuario,
-                retroalimentacion.comentario,
-                retroalimentacion.estado
-            )
-        )
+            id_retroalimentacion = cursor.fetchone()["id_retroalimentacion"]
 
-        id_retroalimentacion = cursor.fetchone()["id_retroalimentacion"]
+            conn.commit()
+            conn.close()
 
-        conn.commit()
-        conn.close()
+            return {
+                "mensaje": "Retroalimentación creada correctamente",
+                "id_retroalimentacion": id_retroalimentacion
+            }
 
-        return {
-            "mensaje": "Retroalimentación creada correctamente",
-            "id_retroalimentacion": id_retroalimentacion
-        }
+        except psycopg2.Error as e:
+            print("Error al crear retroalimentación:", e)
+            return {
+                "error": "No se pudo crear la retroalimentación"
+            }
 
     def actualizarRetroalimentacion(
         self,
         id_retroalimentacion: int,
         retroalimentacion: Retroalimentacion
     ):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        query = """
-            UPDATE retroalimentaciones
-            SET
-                id_avance = %s,
-                id_usuario = %s,
-                comentario = %s,
-                estado = %s,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id_retroalimentacion = %s
-            RETURNING id_retroalimentacion;
-        """
+            query = """
+                UPDATE retroalimentaciones
+                SET
+                    id_avance = %s,
+                    id_usuario = %s,
+                    comentario = %s,
+                    estado = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id_retroalimentacion = %s
+                RETURNING id_retroalimentacion;
+            """
 
-        cursor.execute(
-            query,
-            (
-                retroalimentacion.id_avance,
-                retroalimentacion.id_usuario,
-                retroalimentacion.comentario,
-                retroalimentacion.estado,
-                id_retroalimentacion
+            cursor.execute(
+                query,
+                (
+                    retroalimentacion.id_avance,
+                    retroalimentacion.id_usuario,
+                    retroalimentacion.comentario,
+                    retroalimentacion.estado,
+                    id_retroalimentacion
+                )
             )
-        )
 
-        retroalimentacion_actualizada = cursor.fetchone()
+            retroalimentacion_actualizada = cursor.fetchone()
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+            conn.close()
 
-        return retroalimentacion_actualizada is not None
+            return retroalimentacion_actualizada is not None
+
+        except psycopg2.Error as e:
+            print("Error al actualizar retroalimentación:", e)
+            return False
 
     def eliminarRetroalimentacion(self, id_retroalimentacion: int):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            DELETE FROM retroalimentaciones
-            WHERE id_retroalimentacion = %s
-            RETURNING id_retroalimentacion;
-        """, (id_retroalimentacion,))
+            cursor.execute("""
+                DELETE FROM retroalimentaciones
+                WHERE id_retroalimentacion = %s
+                RETURNING id_retroalimentacion;
+            """, (id_retroalimentacion,))
 
-        eliminado = cursor.fetchone()
+            eliminado = cursor.fetchone()
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+            conn.close()
 
-        return eliminado is not None
+            return eliminado is not None
+
+        except psycopg2.Error as e:
+            print("Error al eliminar retroalimentación:", e)
+            return False

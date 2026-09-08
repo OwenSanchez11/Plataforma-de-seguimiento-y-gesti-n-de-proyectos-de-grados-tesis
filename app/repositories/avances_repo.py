@@ -1,3 +1,4 @@
+import psycopg2
 from app.core.database import Database
 from app.models.avances import Avances
 
@@ -7,96 +8,106 @@ class AvancesRepository:
     def __init__(self):
         self.db = Database()
 
-
     def obtenerAvances(self):
 
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM avances
-            ORDER BY id_avance ASC
-        """)
+            cursor.execute("""
+                SELECT *
+                FROM avances
+                ORDER BY id_avance ASC
+            """)
 
-        avances = cursor.fetchall()
+            avances = cursor.fetchall()
 
-        conn.close()
+            conn.close()
 
-        return avances
+            return avances
 
+        except psycopg2.Error as e:
+            print("Error al obtener avances:", e)
+            return []
 
     def obtenerAvancesPorId(self, id_avance: int):
 
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM avances
-            WHERE id_avance = %s;
-        """, (id_avance,))
+            cursor.execute("""
+                SELECT *
+                FROM avances
+                WHERE id_avance = %s;
+            """, (id_avance,))
 
-        avance = cursor.fetchone()
+            avance = cursor.fetchone()
 
-        conn.close()
+            conn.close()
 
-        return avance
+            return avance
 
+        except psycopg2.Error as e:
+            print("Error al obtener avance:", e)
+            return None
 
     def crearAvances(self, avance: Avances):
 
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        query = """
-            INSERT INTO avances (
-                id_trabajo_grado,
-                titulo,
-                subido_por,
-                descripcion,
-                numero_version,
-                nombre_archivo,
-                ruta_archivo,
-                tamano_bytes,
-                fecha_inicio,
-                fecha_entrega,
-                fecha_limite,
-                estado
+            query = """
+                INSERT INTO avances (
+                    id_trabajo_grado,
+                    titulo,
+                    subido_por,
+                    descripcion,
+                    numero_version,
+                    nombre_archivo,
+                    ruta_archivo,
+                    tamano_bytes,
+                    fecha_inicio,
+                    fecha_entrega,
+                    fecha_limite,
+                    estado
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s
+                )
+                RETURNING id_avance;
+            """
+
+            cursor.execute(
+                query,
+                (
+                    avance.id_trabajo_grado,
+                    avance.titulo,
+                    avance.subido_por,
+                    avance.descripcion,
+                    avance.numero_version,
+                    avance.nombre_archivo,
+                    avance.ruta_archivo,
+                    avance.tamano_bytes,
+                    avance.fecha_inicio,
+                    avance.fecha_entrega,
+                    avance.fecha_limite,
+                    avance.estado
+                )
             )
-            VALUES (
-                %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s
-            )
-            RETURNING id_avance;
-        """
 
-        cursor.execute(
-            query,
-            (
-                avance.id_trabajo_grado,
-                avance.titulo,
-                avance.subido_por,
-                avance.descripcion,
-                avance.numero_version,
-                avance.nombre_archivo,
-                avance.ruta_archivo,
-                avance.tamano_bytes,
-                avance.fecha_inicio,
-                avance.fecha_entrega,
-                avance.fecha_limite,
-                avance.estado
-            )
-        )
+            id_avance = cursor.fetchone()["id_avance"]
 
-        id_avance = cursor.fetchone()["id_avance"]
+            conn.commit()
+            conn.close()
 
-        conn.commit()
+            return id_avance
 
-        conn.close()
-
-        return id_avance
-
+        except psycopg2.Error as e:
+            print("Error al crear avance:", e)
+            return None
 
     def actualizarAvances(
         self,
@@ -104,72 +115,79 @@ class AvancesRepository:
         avance: Avances
     ):
 
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        query = """
-            UPDATE avances
-            SET
-                id_trabajo_grado = %s,
-                titulo = %s,
-                subido_por = %s,
-                descripcion = %s,
-                numero_version = %s,
-                nombre_archivo = %s,
-                ruta_archivo = %s,
-                tamano_bytes = %s,
-                fecha_inicio = %s,
-                fecha_entrega = %s,
-                fecha_limite = %s,
-                estado = %s,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id_avance = %s
-            RETURNING id_avance;
-        """
+            query = """
+                UPDATE avances
+                SET
+                    id_trabajo_grado = %s,
+                    titulo = %s,
+                    subido_por = %s,
+                    descripcion = %s,
+                    numero_version = %s,
+                    nombre_archivo = %s,
+                    ruta_archivo = %s,
+                    tamano_bytes = %s,
+                    fecha_inicio = %s,
+                    fecha_entrega = %s,
+                    fecha_limite = %s,
+                    estado = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id_avance = %s
+                RETURNING id_avance;
+            """
 
-        cursor.execute(
-            query,
-            (
-                avance.id_trabajo_grado,
-                avance.titulo,
-                avance.subido_por,
-                avance.descripcion,
-                avance.numero_version,
-                avance.nombre_archivo,
-                avance.ruta_archivo,
-                avance.tamano_bytes,
-                avance.fecha_inicio,
-                avance.fecha_entrega,
-                avance.fecha_limite,
-                avance.estado,
-                id_avance
+            cursor.execute(
+                query,
+                (
+                    avance.id_trabajo_grado,
+                    avance.titulo,
+                    avance.subido_por,
+                    avance.descripcion,
+                    avance.numero_version,
+                    avance.nombre_archivo,
+                    avance.ruta_archivo,
+                    avance.tamano_bytes,
+                    avance.fecha_inicio,
+                    avance.fecha_entrega,
+                    avance.fecha_limite,
+                    avance.estado,
+                    id_avance
+                )
             )
-        )
 
-        avance_actualizado = cursor.fetchone()
+            avance_actualizado = cursor.fetchone()
 
-        conn.commit()
+            conn.commit()
+            conn.close()
 
-        conn.close()
+            return avance_actualizado is not None
 
-        return avance_actualizado is not None
-
+        except psycopg2.Error as e:
+            print("Error al actualizar avance:", e)
+            return False
 
     def eliminarAvances(self, id_avance: int):
 
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            DELETE FROM avances
-            WHERE id_avance = %s
-            RETURNING id_avance;
-        """, (id_avance,))
+            cursor.execute("""
+                DELETE FROM avances
+                WHERE id_avance = %s
+                RETURNING id_avance;
+            """, (id_avance,))
 
-        eliminado = cursor.fetchone()
+            eliminado = cursor.fetchone()
 
-        conn.commit()
+            conn.commit()
+            conn.close()
 
-        conn.close()
+            return eliminado is not None
 
-        return eliminado is not None
+        except psycopg2.Error as e:
+            print("Error al eliminar avance:", e)
+            return False
