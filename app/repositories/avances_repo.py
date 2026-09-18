@@ -71,11 +71,12 @@ class AvancesRepository:
                     fecha_inicio,
                     fecha_entrega,
                     fecha_limite,
-                    estado
+                    estado,
+                    dictamen
                 )
                 VALUES (
                     %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s
                 )
                 RETURNING id_avance;
             """
@@ -94,7 +95,8 @@ class AvancesRepository:
                     avance.fecha_inicio,
                     avance.fecha_entrega,
                     avance.fecha_limite,
-                    avance.estado
+                    avance.estado,
+                    avance.dictamen
                 )
             )
 
@@ -134,7 +136,8 @@ class AvancesRepository:
                     fecha_entrega = %s,
                     fecha_limite = %s,
                     estado = %s,
-                    updated_at = CURRENT_TIMESTAMP
+                    updated_at = CURRENT_TIMESTAMP,
+                    dictamen = %s
                 WHERE id_avance = %s
                 RETURNING id_avance;
             """
@@ -154,6 +157,7 @@ class AvancesRepository:
                     avance.fecha_entrega,
                     avance.fecha_limite,
                     avance.estado,
+                    avance.dictamen,
                     id_avance
                 )
             )

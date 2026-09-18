@@ -30,3 +30,5 @@ class Avances(BaseModel):
     fecha_limite: Optional[datetime] = None
 
     estado: Optional[bool] = True
+    
+    dictamen: Optional[str] = None
