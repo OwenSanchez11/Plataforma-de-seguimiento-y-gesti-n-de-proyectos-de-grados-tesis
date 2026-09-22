@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 from app.api import rutas_usuario
 from app.api import rutas_rol
@@ -15,6 +16,8 @@ from app.api import rutas_modulo_rol
 from app.api import ruta_rol_proyecto
 
 
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
 app = FastAPI(
     title="Backend sistema de seguimiento de trabajos de grados",
     description="Sistema diseñado para hacer seguimiento a los trabajos de grado realizados por los estudiantes de la universidad",
@@ -23,7 +26,7 @@ app = FastAPI(
 
 origins = [
     "http://localhost:5173",
-    "https://tu-proyecto.netlify.app",
+    frontend_url,
 ]
 
 app.add_middleware(
