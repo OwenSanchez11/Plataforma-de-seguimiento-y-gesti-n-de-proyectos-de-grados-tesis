@@ -8,18 +8,22 @@ class AvancesRepository:
     def __init__(self):
         self.db = Database()
 
-    def obtenerAvances(self):
+    def obtenerAvances(self, id_trabajo_grado=None):
 
         try:
             conn = self.db.getConnection()
             cursor = conn.cursor()
 
-            cursor.execute("""
-                SELECT *
-                FROM avances
-                ORDER BY id_avance ASC
-            """)
-
+            query = "SELECT * FROM avances"
+            valores = []
+            
+            if id_trabajo_grado is not None:
+                query += " WHERE id_trabajo_grado = %s "
+                valores.append(id_trabajo_grado)
+            
+            query += " ORDER BY id_avance ASC "
+            
+            cursor.execute(query, valores)
             avances = cursor.fetchall()
 
             conn.close()

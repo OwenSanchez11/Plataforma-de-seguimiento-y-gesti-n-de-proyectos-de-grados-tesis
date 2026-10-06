@@ -8,22 +8,38 @@ class EvaluacionRepository:
     def __init__(self):
         self.db = Database()
 
-    def obtenerEvaluaciones(self):
+    def obtenerEvaluaciones(self, id_carrera=None, id_facultad=None):
 
         try:
             conn = self.db.getConnection()
             cursor = conn.cursor()
 
-            cursor.execute("""
-                SELECT *
-                FROM evaluacion_final
-                ORDER BY id_evaluacion ASC
-            """)
+            query = """
+                SELECT e.*
+                FROM evaluacion_final e 
+                LEFT JOIN trabajo_grado t ON e.id_trabajo_grado = t.id_trabajo_grado
+                LEFT JOIN carrera c ON t.id_carrera = c.id_carrera            
+            """
+            
+            condiciones = []
+            valores = []
 
+
+            if id_carrera is not None:
+                condiciones.append("c.id_carrera = %s")
+                valores.append(id_carrera)
+                
+            if id_facultad is not None:
+                condiciones.append("c.id_facultad = %s")
+                valores.append(id_facultad)
+                
+            if condiciones:
+                query += " WHERE " + " AND ".join(condiciones)                
+
+            cursor.execute(query, valores)
             evaluaciones = cursor.fetchall()
-
             conn.close()
-
+            
             return evaluaciones
 
         except psycopg2.Error as e:

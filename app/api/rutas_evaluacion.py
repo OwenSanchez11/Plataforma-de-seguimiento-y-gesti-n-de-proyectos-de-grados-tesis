@@ -14,9 +14,9 @@ repo = EvaluacionRepository()
 
 
 @router.get("/")
-def obtener_evaluaciones():
+def obtener_evaluaciones(id_carrera: int | None = None, id_facultad:int | None=None):
 
-    return repo.obtenerEvaluaciones()
+    return repo.obtenerEvaluaciones(id_carrera, id_facultad)
 
 
 @router.get("/{id_evaluacion}")

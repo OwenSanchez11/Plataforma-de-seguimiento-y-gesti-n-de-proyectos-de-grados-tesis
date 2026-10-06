@@ -14,9 +14,9 @@ repo = AvancesRepository()
 
 
 @router.get("/")
-def obtener_avances():
+def obtener_avances(id_trabajo_grado: int | None = None):
 
-    return repo.obtenerAvances()
+    return repo.obtenerAvances(id_trabajo_grado)
 
 
 @router.get("/{id_avance}")
