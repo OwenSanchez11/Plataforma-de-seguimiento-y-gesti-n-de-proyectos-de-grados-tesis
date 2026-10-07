@@ -61,19 +61,12 @@ def actualizar_trabajo_grado(
     }
 
 
-@router.delete("/{id_trabajo_grado}")
-def eliminar_trabajo_grado(id_trabajo_grado: int):
-
-    eliminado = repo.eliminarTrabajoGrado(
-        id_trabajo_grado
-    )
+@router.delete("/{id_trabajo_grado}", status_code=204)
+def eliminar_trabajo(id_trabajo_grado: int):
+    try:
+        eliminado = repo.eliminarTrabajoGrado(id_trabajo_grado)
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
     if not eliminado:
-        raise HTTPException(
-            status_code=404,
-            detail="Trabajo de grado no encontrado"
-        )
-
-    return {
-        "Mensaje": "Trabajo de grado eliminado correctamente"
-    }
+        raise HTTPException(status_code=404, detail="Trabajo de grado no encontrado")

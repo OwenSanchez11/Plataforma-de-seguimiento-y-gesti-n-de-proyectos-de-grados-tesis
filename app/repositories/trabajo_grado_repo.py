@@ -1,6 +1,7 @@
 import psycopg2
 from app.core.database import Database
 from app.models.trabajo_grado import Trabajo_grado
+from psycopg2 import errors
 
 
 class TrabajoGradoRepository:
@@ -160,10 +161,9 @@ class TrabajoGradoRepository:
             return False
 
     def eliminarTrabajoGrado(self, id_trabajo_grado: int):
+        conn = self.db.getConnection()
         try:
-            conn = self.db.getConnection()
             cursor = conn.cursor()
-
             cursor.execute("""
                 DELETE FROM trabajo_grado
                 WHERE id_trabajo_grado = %s
@@ -171,12 +171,17 @@ class TrabajoGradoRepository:
             """, (id_trabajo_grado,))
 
             eliminado = cursor.fetchone()
-
             conn.commit()
-            conn.close()
-
             return eliminado is not None
 
+        except errors.ForeignKeyViolation:
+            conn.rollback()
+            raise ValueError("No se puede eliminar: el trabajo de grado tiene registros asociados (avances, etc.)")
+
         except psycopg2.Error as e:
+            conn.rollback()
             print("Error al eliminar trabajo de grado:", e)
-            return False
+            raise
+
+        finally:
+            conn.close()

@@ -1,7 +1,7 @@
 import psycopg2
 from app.core.database import Database
 from app.models.evaluacion import Evaluacion
-
+from fastapi import HTTPException
 
 class EvaluacionRepository:
 
@@ -69,7 +69,7 @@ class EvaluacionRepository:
             return None
 
     def crearEvaluacion(self, evaluacion: Evaluacion):
-
+        conn = None
         try:
             conn = self.db.getConnection()
             cursor = conn.cursor()
@@ -120,62 +120,65 @@ class EvaluacionRepository:
                 "id_evaluacion": id_evaluacion
             }
 
+        except psycopg2.errors.ForeignKeyViolation:
+            conn.rollback()
+            raise HTTPException(status_code=400, detail="El trabajo de grado o el usuario no existe")
         except psycopg2.Error as e:
+            conn.rollback()
             print("Error al crear evaluación:", e)
-            return {
-                "error": "No se pudo crear la evaluación"
-            }
+            raise HTTPException(status_code=500, detail="No se pudo crear la evaluación")
+        finally:
+            if conn:
+                conn.close()
 
-    def actualizarEvaluacion(
-        self,
-        id_evaluacion: int,
-        evaluacion: Evaluacion
-    ):
-
+    def actualizarEvaluacion(self, id_evaluacion: int, evaluacion: Evaluacion):
+        conn = None
         try:
             conn = self.db.getConnection()
             cursor = conn.cursor()
 
             query = """
                 UPDATE evaluacion_final
-                SET
-                    id_trabajo_grado = %s,
+                SET id_trabajo_grado = %s,
                     id_usuario = %s,
                     nota = %s,
                     veredicto = %s,
                     observaciones = %s,
-                    fecha_evaluacion = %s,
-                    estado = %s,
-                    updated_at = CURRENT_TIMESTAMP
+                    fecha_evaluacion = COALESCE(%s, fecha_evaluacion),
+                    estado = %s
                 WHERE id_evaluacion = %s
                 RETURNING id_evaluacion;
             """
 
-            cursor.execute(
-                query,
-                (
-                    evaluacion.id_trabajo_grado,
-                    evaluacion.id_usuario,
-                    evaluacion.nota,
-                    evaluacion.veredicto,
-                    evaluacion.observaciones,
-                    evaluacion.fecha_evaluacion,
-                    evaluacion.estado,
-                    id_evaluacion
-                )
-            )
+            cursor.execute(query, (
+                evaluacion.id_trabajo_grado,
+                evaluacion.id_usuario,
+                evaluacion.nota,
+                evaluacion.veredicto,
+                evaluacion.observaciones,
+                evaluacion.fecha_evaluacion,
+                evaluacion.estado,
+                id_evaluacion
+            ))
 
-            evaluacion_actualizada = cursor.fetchone()
+            fila = cursor.fetchone()
+            if fila is None:
+                conn.rollback()
+                raise HTTPException(status_code=404, detail="Evaluación no encontrada")
 
             conn.commit()
+            return {"mensaje": "Evaluación actualizada correctamente", "id_evaluacion": fila["id_evaluacion"]}
 
-            conn.close()
-
-            return evaluacion_actualizada is not None
-
+        except psycopg2.errors.ForeignKeyViolation:
+            conn.rollback()
+            raise HTTPException(status_code=400, detail="El trabajo de grado o el usuario no existe")
         except psycopg2.Error as e:
+            conn.rollback()
             print("Error al actualizar evaluación:", e)
-            return False
+            raise HTTPException(status_code=500, detail="No se pudo actualizar la evaluación")
+        finally:
+            if conn:
+                conn.close()
 
     def eliminarEvaluacion(self, id_evaluacion: int):
 
