@@ -33,6 +33,45 @@ class EquipoTrabajoRepository:
         except psycopg2.Error as e:
             print("Error al obtener equipos de trabajo:", e)
             return []
+        
+        
+    def obtenerTrabajoPorEstudiante(self, id_user):
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
+        try:
+            # 1) El trabajo de grado del estudiante (pasando por equipo_trabajo)
+            cursor.execute("""
+                SELECT tg.*
+                FROM trabajo_grado tg
+                JOIN equipo_trabajo et ON et.id_trabajo_grado = tg.id_trabajo_grado
+                WHERE et.id_usuario = %s
+                AND et.estado = TRUE
+                LIMIT 1
+            """, (id_user,))
+            trabajo = cursor.fetchone()
+
+            if trabajo is None:
+                return None
+
+            # 2) Todo el equipo de ese trabajo
+            cursor.execute("""
+                SELECT u.id_user, u.nombre, u.apellido, u.correo,
+                    rp.nombre AS rol_proyecto,
+                    et.fecha_asignacion
+                FROM equipo_trabajo et
+                JOIN usuarios u ON u.id_user = et.id_usuario
+                LEFT JOIN rol_proyecto rp ON rp.id_rol_proyecto = et.id_rol_proyecto
+                WHERE et.id_trabajo_grado = %s
+                AND et.estado = TRUE
+            """, (trabajo["id_trabajo_grado"],))
+            equipo = cursor.fetchall()
+
+            return {"trabajo": trabajo, "equipo": equipo}
+        finally:
+            cursor.close()
+            conn.close()
+
+        
 
     def obtenerEquipoTrabajoPorId(
         self,

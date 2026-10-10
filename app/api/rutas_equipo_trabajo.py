@@ -39,6 +39,14 @@ def obtener_equipo_trabajo_por_id(
     return equipo
 
 
+@router.get("/{id_user}")
+def obtener_trabajo_estudiante(id_user: int):
+    resultado = repo.obtenerTrabajoPorEstudiante(id_user)
+    if resultado is None:
+        raise HTTPException(status_code=404, detail="El estudiante no tiene trabajo de grado asignado")
+    return resultado
+
+
 @router.post("/")
 def crear_equipo_trabajo(equipo: EquipoTrabajo):
     return repo.crearEquipoTrabajo(equipo)
