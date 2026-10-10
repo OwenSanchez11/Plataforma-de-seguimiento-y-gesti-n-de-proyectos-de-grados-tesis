@@ -55,11 +55,11 @@ class EquipoTrabajoRepository:
 
             # 2) Todo el equipo de ese trabajo
             cursor.execute("""
-                SELECT u.id_user, u.nombre, u.apellido, u.correo,
+                SELECT u.id_user, u.nombre, u.apellido, u.email AS correo,
                     rp.nombre AS rol_proyecto,
                     et.fecha_asignacion
                 FROM equipo_trabajo et
-                JOIN usuarios u ON u.id_user = et.id_usuario
+                JOIN usuario u ON u.id_user = et.id_usuario
                 LEFT JOIN rol_proyecto rp ON rp.id_rol_proyecto = et.id_rol_proyecto
                 WHERE et.id_trabajo_grado = %s
                 AND et.estado = TRUE
