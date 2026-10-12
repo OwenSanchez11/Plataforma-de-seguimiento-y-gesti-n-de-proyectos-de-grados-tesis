@@ -32,6 +32,9 @@ def obtener_retroalimentacion_por_id(id_retroalimentacion: int):
 
     return retroalimentacion
 
+@router.get("/trabajo/{id_trabajo_grado}")
+def retroalimentacion_por_trabajo(id_trabajo_grado: int):
+    return repo.obtenerPorTrabajo(id_trabajo_grado)
 
 @router.post("/")
 def crear_retroalimentacion(

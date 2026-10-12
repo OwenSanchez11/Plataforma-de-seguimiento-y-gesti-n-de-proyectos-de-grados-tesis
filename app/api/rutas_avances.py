@@ -32,6 +32,10 @@ def obtener_avance_por_id(id_avance: int):
 
     return avance
 
+@router.get("/trabajo/{id_trabajo_grado}")
+def avance_por_trabajo(id_trabajo_grado: int):
+    return repo.obtenerAvancePorTrabajo(id_trabajo_grado) 
+
 
 @router.post("/")
 def crear_avance(avance: Avances):

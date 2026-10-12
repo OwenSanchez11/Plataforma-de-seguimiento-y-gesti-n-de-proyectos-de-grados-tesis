@@ -56,6 +56,22 @@ class AvancesRepository:
             print("Error al obtener avance:", e)
             return None
 
+
+    def obtenerAvancePorTrabajo(self, id_trabajo_grado):
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
+        cursor.execute("""
+                SELECT id_avance, titulo, descripcion, numero_version, 
+                    nombre_archivo, ruta_archivo, tamano_bytes, fecha_inicio, fecha_entrega, fecha_limite,
+                    estado, dictamen
+                FROM avances
+                WHERE id_trabajo_grado = %s
+                ORDER BY fecha_limite
+            """, (id_trabajo_grado,) 
+            
+        ) 
+        return cursor.fetchall()
+    
     def crearAvances(self, avance: Avances):
 
         try:

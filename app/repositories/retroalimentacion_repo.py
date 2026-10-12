@@ -50,6 +50,31 @@ class RetroalimentacionesRepository:
             print("Error al obtener retroalimentación:", e)
             return None
 
+
+    def obtenerPorTrabajo(self, id_trabajo_grado):
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+                SELECT r.id_retroalimentacion,
+                    r.id_usuario AS id_user,
+                    r.comentario,
+                    r.created_at,
+                    a.id_avance,
+                    a.titulo AS avance_titulo,
+                    a.numero_version,
+                    a.fecha_entrega,
+                    a.fecha_limite,
+                    a.dictamen
+                FROM retroalimentaciones r
+                JOIN avances a ON a.id_avance = r.id_avance
+                WHERE a.id_trabajo_grado = %s
+                    AND r.estado = TRUE
+                ORDER BY r.created_at DESC
+            """, (id_trabajo_grado,)
+        )
+        return cursor.fetchall();
+
     def crearRetroalimentacion(
         self,
         retroalimentacion: Retroalimentacion
