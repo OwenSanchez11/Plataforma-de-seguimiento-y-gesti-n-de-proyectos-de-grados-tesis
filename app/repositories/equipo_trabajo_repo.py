@@ -71,6 +71,68 @@ class EquipoTrabajoRepository:
             cursor.close()
             conn.close()
 
+    def obtenerTrabajoPorDocente(self, id_user): 
+        conn = self.db.getConnection()
+        cursor = conn.cursor()
+        
+        try:
+            # 1) Todos los trabajos donde participa el docente
+            cursor.execute(
+                """
+                    SELECT tg.*,
+                        rp.nombre AS rol_docente,
+                        c.nombre_carrera AS carrera,
+                        ult.nombre_archivo AS ultimo_avance,
+                        ult.fecha_entrega AS fecha_ultimo_avance,
+                        (ev.id_evaluacion IS NOT NULL) AS evaluado
+                    FROM trabajo_grado tg
+                    JOIN equipo_trabajo et ON et.id_trabajo_grado = tg.id_trabajo_grado
+                    LEFT JOIN rol_proyecto rp ON rp.id_rol_proyecto = et.id_rol_proyecto
+                    LEFT JOIN carrera c ON c.id_carrera = tg.id_carrera
+                    LEFT JOIN LATERAL (
+                        SELECT a.nombre_archivo, a.fecha_entrega
+                        FROM avances a
+                        WHERE a.id_trabajo_grado = tg.id_trabajo_grado
+                            AND a.estado = TRUE
+                        ORDER BY a.fecha_entrega DESC NULLS LAST
+                        LIMIT 1
+                    ) ult ON TRUE
+                    LEFT JOIN evaluacion_final ev
+                        ON ev.id_trabajo_grado = tg.id_trabajo_grado
+                        AND ev.id_usuario = et.id_usuario
+                        AND ev.estado = TRUE
+                    WHERE et.id_usuario = %s
+                        AND et.estado = TRUE
+                """, (id_user,))
+            trabajos = cursor.fetchall()
+            
+            if not trabajos:
+                return []
+            
+            ##2) equipos de todos los trabajos en una sola consulta
+            
+            ids = [t["id_trabajo_grado"] for t in trabajos]
+            cursor.execute(
+                """
+                    SELECT et.id_trabajo_grado,
+                            u.id_user, u.nombre, u.apellido, u.email AS correo,
+                            rp.nombre AS rol_proyecto,
+                            et.fecha_asignacion
+                    FROM equipo_trabajo et
+                    JOIN usuario u ON u.id_user = et.id_usuario
+                    LEFT JOIN rol_proyecto rp ON rp.id_rol_proyecto = et.id_rol_proyecto
+                    WHERE et.id_trabajo_Grado = ANY(%s)
+                        AND et.estado = TRUE
+                """, (ids,)) 
+            equipo = cursor.fetchall()
+            
+            for t in trabajos:
+                t["equipo"] = [e for e in equipo if e["id_trabajo_grado"] == t["id_trabajo_grado"]]
+                
+            return trabajos
+        finally:
+            cursor.close()
+            conn.close()
         
 
     def obtenerEquipoTrabajoPorId(
