@@ -1,3 +1,4 @@
+
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
@@ -12,4 +13,3 @@ class EquipoTrabajo(BaseModel):
     fecha_asignacion: Optional[date] = None
     fecha_finalizacion: Optional[date] = None
     estado: bool = True
-

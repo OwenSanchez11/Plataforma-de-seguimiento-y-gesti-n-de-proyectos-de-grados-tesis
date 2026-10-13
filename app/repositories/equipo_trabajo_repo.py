@@ -1,8 +1,8 @@
+
 import psycopg2
+
 from app.core.database import Database
-from app.models.equipo_trabajo import (
-    EquipoTrabajo
-)
+from app.models.equipo_trabajo import EquipoTrabajo
 
 
 class EquipoTrabajoRepository:
@@ -11,6 +11,8 @@ class EquipoTrabajoRepository:
         self.db = Database()
 
     def obtenerEquiposTrabajo(self):
+        conn = None
+        cursor = None
 
         try:
             conn = self.db.getConnection()
@@ -19,64 +21,89 @@ class EquipoTrabajoRepository:
             cursor.execute("""
                 SELECT *
                 FROM equipo_trabajo
-                ORDER BY id_trabajo_grado ASC,
-                         id_usuario ASC,
-                         id_rol_proyecto ASC
+                ORDER BY
+                    id_trabajo_grado ASC,
+                    id_usuario ASC,
+                    id_rol_proyecto ASC
             """)
 
-            equipos = cursor.fetchall()
-
-            conn.close()
-
-            return equipos
+            return cursor.fetchall()
 
         except psycopg2.Error as e:
             print("Error al obtener equipos de trabajo:", e)
             return []
-        
-        
+
+        finally:
+            if cursor:
+                cursor.close()
+
+            if conn:
+                conn.close()
+
     def obtenerTrabajoPorEstudiante(self, id_user):
-        conn = self.db.getConnection()
-        cursor = conn.cursor()
+        conn = None
+        cursor = None
+
         try:
-            # 1) El trabajo de grado del estudiante (pasando por equipo_trabajo)
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
+
+            # Buscar el trabajo de grado del usuario.
             cursor.execute("""
                 SELECT tg.*
                 FROM trabajo_grado tg
-                JOIN equipo_trabajo et ON et.id_trabajo_grado = tg.id_trabajo_grado
+                JOIN equipo_trabajo et
+                    ON et.id_trabajo_grado = tg.id_trabajo_grado
                 WHERE et.id_usuario = %s
-                AND et.estado = TRUE
+                  AND et.estado = TRUE
+                  AND et.id_rol_proyecto = 2
+                ORDER BY et.fecha_asignacion DESC
                 LIMIT 1
             """, (id_user,))
+
             trabajo = cursor.fetchone()
 
             if trabajo is None:
                 return None
 
-            # 2) Todo el equipo de ese trabajo
+            # Obtener los integrantes activos del trabajo.
             cursor.execute("""
-                SELECT u.id_user, u.nombre, u.apellido, u.email AS correo,
+                SELECT
+                    u.id_user,
+                    u.nombre,
+                    u.apellido,
+                    u.email AS correo,
                     rp.nombre AS rol_proyecto,
                     et.fecha_asignacion
                 FROM equipo_trabajo et
-                JOIN usuario u ON u.id_user = et.id_usuario
-                LEFT JOIN rol_proyecto rp ON rp.id_rol_proyecto = et.id_rol_proyecto
+                JOIN usuario u
+                    ON u.id_user = et.id_usuario
+                LEFT JOIN rol_proyecto rp
+                    ON rp.id_rol_proyecto = et.id_rol_proyecto
                 WHERE et.id_trabajo_grado = %s
-                AND et.estado = TRUE
+                  AND et.estado = TRUE
+                ORDER BY et.id_rol_proyecto ASC, u.nombre ASC
             """, (trabajo["id_trabajo_grado"],))
+
             equipo = cursor.fetchall()
 
-            return {"trabajo": trabajo, "equipo": equipo}
+            return {
+                "trabajo": trabajo,
+                "equipo": equipo
+            }
+
+        except psycopg2.Error as e:
+            print("Error al obtener el trabajo del estudiante:", e)
+            return None
+
         finally:
-            cursor.close()
-            conn.close()
+            if cursor:
+                cursor.close()
 
-        
+            if conn:
+                conn.close()
 
-    def obtenerEquipoTrabajoPorId(
-        self,
-        id_equipo: int,
-    ):
+    def obtenerEquipoTrabajoPorId(self, id_equipo):
         conn = None
         cursor = None
 
@@ -88,22 +115,24 @@ class EquipoTrabajoRepository:
                 SELECT *
                 FROM equipo_trabajo
                 WHERE id_equipo = %s
-            """, (
-                id_equipo,
-            ))
+            """, (id_equipo,))
 
-            equipo = cursor.fetchone()
-
-            return equipo
+            return cursor.fetchone()
 
         except psycopg2.Error as e:
             print("Error al obtener equipo de trabajo:", e)
             return None
 
-    def crearEquipoTrabajo(
-        self,
-        equipo: EquipoTrabajo
-    ):
+        finally:
+            if cursor:
+                cursor.close()
+
+            if conn:
+                conn.close()
+
+    def crearEquipoTrabajo(self, equipo: EquipoTrabajo):
+        conn = None
+        cursor = None
 
         try:
             conn = self.db.getConnection()
@@ -128,7 +157,7 @@ class EquipoTrabajoRepository:
                     %s,
                     %s
                 )
-                RETURNING id_equipo;
+                RETURNING id_equipo
             """, (
                 equipo.id_trabajo_grado,
                 equipo.id_usuario,
@@ -139,22 +168,27 @@ class EquipoTrabajoRepository:
                 equipo.estado
             ))
 
-            resultado = cursor.fetchone()["id_equipo"]
+            resultado = cursor.fetchone()
 
             conn.commit()
-            conn.close()
 
-            return resultado
+            return resultado["id_equipo"]
 
         except psycopg2.Error as e:
+            if conn:
+                conn.rollback()
+
             print("Error al crear equipo de trabajo:", e)
             return None
 
-    def actualizarEquipoTrabajo(
-        self,
-        id_equipo: int,
-        equipo: EquipoTrabajo
-    ):
+        finally:
+            if cursor:
+                cursor.close()
+
+            if conn:
+                conn.close()
+
+    def actualizarEquipoTrabajo(self, id_equipo: int, equipo: EquipoTrabajo):
         conn = None
         cursor = None
 
@@ -165,13 +199,28 @@ class EquipoTrabajoRepository:
             cursor.execute("""
                 UPDATE equipo_trabajo
                 SET
-                    id_trabajo_grado = COALESCE(%s, id_trabajo_grado),
-                    id_usuario = COALESCE(%s, id_usuario),
-                    id_rol_proyecto = COALESCE(%s, id_rol_proyecto),
-                    observaciones = COALESCE(%s, observaciones),
-                    fecha_asignacion = COALESCE(%s, fecha_asignacion),
-                    fecha_finalizacion = COALESCE(%s, fecha_finalizacion),
-                    estado = COALESCE(%s, estado)
+                    id_trabajo_grado = COALESCE(
+                        %s, id_trabajo_grado
+                    ),
+                    id_usuario = COALESCE(
+                        %s, id_usuario
+                    ),
+                    id_rol_proyecto = COALESCE(
+                        %s, id_rol_proyecto
+                    ),
+                    observaciones = COALESCE(
+                        %s, observaciones
+                    ),
+                    fecha_asignacion = COALESCE(
+                        %s, fecha_asignacion
+                    ),
+                    fecha_finalizacion = COALESCE(
+                        %s, fecha_finalizacion
+                    ),
+                    estado = COALESCE(
+                        %s, estado
+                    ),
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE id_equipo = %s
                 RETURNING
                     id_equipo,
@@ -195,6 +244,10 @@ class EquipoTrabajoRepository:
 
             actualizado = cursor.fetchone()
 
+            if actualizado is None:
+                conn.rollback()
+                return None
+
             conn.commit()
 
             return actualizado
@@ -206,11 +259,14 @@ class EquipoTrabajoRepository:
             print("Error al actualizar equipo de trabajo:", e)
             return None
 
+        finally:
+            if cursor:
+                cursor.close()
 
-    def eliminarEquipoTrabajo(
-        self,
-        id_equipo: int
-    ):
+            if conn:
+                conn.close()
+
+    def eliminarEquipoTrabajo(self, id_equipo: int):
         conn = None
         cursor = None
 
@@ -222,11 +278,13 @@ class EquipoTrabajoRepository:
                 DELETE FROM equipo_trabajo
                 WHERE id_equipo = %s
                 RETURNING id_equipo
-            """, (
-                id_equipo,
-            ))
+            """, (id_equipo,))
 
             eliminado = cursor.fetchone()
+
+            if eliminado is None:
+                conn.rollback()
+                return None
 
             conn.commit()
 

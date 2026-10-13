@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
 from app.models.avances import Avances
-
 from app.repositories.avances_repo import AvancesRepository
 
 
@@ -15,72 +14,52 @@ repo = AvancesRepository()
 
 @router.get("/")
 def obtener_avances(id_trabajo_grado: int | None = None):
-
     return repo.obtenerAvances(id_trabajo_grado)
+
+
+@router.get("/trabajo/{id_trabajo_grado}")
+def avance_por_trabajo(id_trabajo_grado: int):
+    return repo.obtenerAvancePorTrabajo(id_trabajo_grado)
 
 
 @router.get("/{id_avance}")
 def obtener_avance_por_id(id_avance: int):
-
     avance = repo.obtenerAvancesPorId(id_avance)
 
-    if not avance:
-        raise HTTPException(
-            status_code=404,
-            detail="Avance no encontrado"
-        )
+    if avance is None:
+        raise HTTPException(status_code=404, detail="Avance no encontrado")
 
     return avance
-
-@router.get("/trabajo/{id_trabajo_grado}")
-def avance_por_trabajo(id_trabajo_grado: int):
-    return repo.obtenerAvancePorTrabajo(id_trabajo_grado) 
 
 
 @router.post("/")
 def crear_avance(avance: Avances):
-
     nuevo_id_avance = repo.crearAvances(avance)
 
+    if nuevo_id_avance is None:
+        raise HTTPException(status_code=400, detail="No fue posible registrar el avance")
+
     return {
-        "Mensaje": "Avance registrado exitosamente",
+        "mensaje": "Avance registrado exitosamente",
         "id_avance": nuevo_id_avance
     }
 
 
 @router.put("/{id_avance}")
-def actualizar_avance(
-    id_avance: int,
-    avance: Avances
-):
-
-    actualizado = repo.actualizarAvances(
-        id_avance,
-        avance
-    )
+def actualizar_avance(id_avance: int, avance: Avances):
+    actualizado = repo.actualizarAvances(id_avance, avance)
 
     if not actualizado:
-        raise HTTPException(
-            status_code=404,
-            detail="Avance no encontrado"
-        )
+        raise HTTPException(status_code=404, detail="Avance no encontrado")
 
-    return {
-        "Mensaje": "Avance actualizado exitosamente"
-    }
+    return {"mensaje": "Avance actualizado exitosamente"}
 
 
 @router.delete("/{id_avance}")
 def eliminar_avance(id_avance: int):
-
     eliminado = repo.eliminarAvances(id_avance)
 
     if not eliminado:
-        raise HTTPException(
-            status_code=404,
-            detail="Avance no encontrado"
-        )
+        raise HTTPException(status_code=404, detail="Avance no encontrado")
 
-    return {
-        "Mensaje": "Avance eliminado correctamente"
-    }
+    return {"mensaje": "Avance eliminado correctamente"}
