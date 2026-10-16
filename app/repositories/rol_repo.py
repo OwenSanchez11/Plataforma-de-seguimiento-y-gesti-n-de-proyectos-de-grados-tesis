@@ -58,9 +58,10 @@ class RolRepository:
             query = """
                 INSERT INTO rol (
                     rol_nombre,
-                    estado
+                    estado,
+                    ambito
                 )
-                VALUES (%s, %s)
+                VALUES (%s, %s, %s)
                 RETURNING id_rol;
             """
 
@@ -68,7 +69,8 @@ class RolRepository:
                 query,
                 (
                     rol.rol_nombre,
-                    rol.estado
+                    rol.estado,
+                    rol.ambito
                 )
             )
 
@@ -98,6 +100,7 @@ class RolRepository:
                 SET
                     rol_nombre = %s,
                     estado = %s,
+                    ambito = %s,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id_rol = %s
                 RETURNING id_rol;
@@ -108,6 +111,7 @@ class RolRepository:
                 (
                     rol.rol_nombre,
                     rol.estado,
+                    rol.ambito,
                     id_rol
                 )
             )

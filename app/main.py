@@ -13,7 +13,6 @@ from app.api import rutas_equipo_trabajo
 from app.api import rutas_evaluacion
 from app.api import rutas_modulo
 from app.api import rutas_modulo_rol
-from app.api import ruta_rol_proyecto
 
 
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -50,4 +49,3 @@ app.include_router(rutas_equipo_trabajo.router)
 app.include_router(rutas_evaluacion.router)
 app.include_router(rutas_modulo.router)
 app.include_router(rutas_modulo_rol.router)
-app.include_router(ruta_rol_proyecto.router)

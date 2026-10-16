@@ -24,7 +24,7 @@ class EquipoTrabajoRepository:
                 ORDER BY
                     id_trabajo_grado ASC,
                     id_usuario ASC,
-                    id_rol_proyecto ASC
+                    id_rol ASC
             """)
 
             return cursor.fetchall()
@@ -52,11 +52,12 @@ class EquipoTrabajoRepository:
             cursor.execute("""
                 SELECT tg.*
                 FROM trabajo_grado tg
-                JOIN equipo_trabajo et
-                    ON et.id_trabajo_grado = tg.id_trabajo_grado
+                JOIN equipo_trabajo et ON et.id_trabajo_grado = tg.id_trabajo_grado
+                JOIN rol r ON r.id_rol = et.id_rol
                 WHERE et.id_usuario = %s
-                  AND et.estado = TRUE
-                  AND et.id_rol_proyecto = 2
+                AND et.estado = TRUE
+                AND r.ambito = 'PROYECTO'
+                AND r.rol_nombre IN ('Estudiante')
                 ORDER BY et.fecha_asignacion DESC
                 LIMIT 1
             """, (id_user,))
@@ -73,16 +74,17 @@ class EquipoTrabajoRepository:
                     u.nombre,
                     u.apellido,
                     u.email AS correo,
-                    rp.nombre AS rol_proyecto,
+                    r.rol_nombre AS rol_proyecto,
                     et.fecha_asignacion
                 FROM equipo_trabajo et
                 JOIN usuario u
                     ON u.id_user = et.id_usuario
-                LEFT JOIN rol_proyecto rp
-                    ON rp.id_rol_proyecto = et.id_rol_proyecto
+                JOIN rol r
+                    ON r.id_rol = et.id_rol
                 WHERE et.id_trabajo_grado = %s
                   AND et.estado = TRUE
-                ORDER BY et.id_rol_proyecto ASC, u.nombre ASC
+                  AND r.ambito = 'PROYECTO'
+                ORDER BY et.id_rol ASC, u.nombre ASC
             """, (trabajo["id_trabajo_grado"],))
 
             equipo = cursor.fetchall()
@@ -99,6 +101,8 @@ class EquipoTrabajoRepository:
         finally:
             if cursor:
                 cursor.close()
+            if conn:
+                conn.close()
 
 
     def obtenerTrabajoPorDocente(self, id_user): 
@@ -110,14 +114,14 @@ class EquipoTrabajoRepository:
             cursor.execute(
                 """
                     SELECT tg.*,
-                        rp.nombre AS rol_docente,
+                        r.rol_nombre AS rol_docente,
                         c.nombre_carrera AS carrera,
                         ult.nombre_archivo AS ultimo_avance,
                         ult.fecha_entrega AS fecha_ultimo_avance,
                         (ev.id_evaluacion IS NOT NULL) AS evaluado
                     FROM trabajo_grado tg
                     JOIN equipo_trabajo et ON et.id_trabajo_grado = tg.id_trabajo_grado
-                    LEFT JOIN rol_proyecto rp ON rp.id_rol_proyecto = et.id_rol_proyecto
+                    LEFT JOIN rol r ON r.id_rol = et.id_rol
                     LEFT JOIN carrera c ON c.id_carrera = tg.id_carrera
                     LEFT JOIN LATERAL (
                         SELECT a.nombre_archivo, a.fecha_entrega
@@ -133,6 +137,7 @@ class EquipoTrabajoRepository:
                         AND ev.estado = TRUE
                     WHERE et.id_usuario = %s
                         AND et.estado = TRUE
+                        AND r.ambito = 'PROYECTO'
                 """, (id_user,))
             trabajos = cursor.fetchall()
             
@@ -146,13 +151,14 @@ class EquipoTrabajoRepository:
                 """
                     SELECT et.id_trabajo_grado,
                             u.id_user, u.nombre, u.apellido, u.email AS correo,
-                            rp.nombre AS rol_proyecto,
+                            r.rol_nombre AS rol_proyecto,
                             et.fecha_asignacion
                     FROM equipo_trabajo et
                     JOIN usuario u ON u.id_user = et.id_usuario
-                    LEFT JOIN rol_proyecto rp ON rp.id_rol_proyecto = et.id_rol_proyecto
+                    LEFT JOIN rol r ON r.id_rol = et.id_rol
                     WHERE et.id_trabajo_Grado = ANY(%s)
                         AND et.estado = TRUE
+                        AND r.ambito = 'PROYECTO'
                 """, (ids,)) 
             equipo = cursor.fetchall()
             
@@ -203,7 +209,7 @@ class EquipoTrabajoRepository:
                 INSERT INTO equipo_trabajo (
                     id_trabajo_grado,
                     id_usuario,
-                    id_rol_proyecto,
+                    id_rol,
                     observaciones,
                     fecha_asignacion,
                     fecha_finalizacion,
@@ -222,7 +228,7 @@ class EquipoTrabajoRepository:
             """, (
                 equipo.id_trabajo_grado,
                 equipo.id_usuario,
-                equipo.id_rol_proyecto,
+                equipo.id_rol,
                 equipo.observaciones,
                 equipo.fecha_asignacion,
                 equipo.fecha_finalizacion,
@@ -260,25 +266,25 @@ class EquipoTrabajoRepository:
             cursor.execute("""
                 UPDATE equipo_trabajo
                 SET
-                    id_trabajo_grado = COALESCE(
+                    id_trabajo_grado = (
                         %s, id_trabajo_grado
                     ),
-                    id_usuario = COALESCE(
+                    id_usuario = (
                         %s, id_usuario
                     ),
-                    id_rol_proyecto = COALESCE(
-                        %s, id_rol_proyecto
+                    id_rol = (
+                        %s, id_rol
                     ),
-                    observaciones = COALESCE(
+                    observaciones = (
                         %s, observaciones
                     ),
-                    fecha_asignacion = COALESCE(
+                    fecha_asignacion = (
                         %s, fecha_asignacion
                     ),
-                    fecha_finalizacion = COALESCE(
+                    fecha_finalizacion = (
                         %s, fecha_finalizacion
                     ),
-                    estado = COALESCE(
+                    estado = (
                         %s, estado
                     ),
                     updated_at = CURRENT_TIMESTAMP
@@ -287,7 +293,7 @@ class EquipoTrabajoRepository:
                     id_equipo,
                     id_trabajo_grado,
                     id_usuario,
-                    id_rol_proyecto,
+                    id_rol,
                     observaciones,
                     fecha_asignacion,
                     fecha_finalizacion,
@@ -295,7 +301,7 @@ class EquipoTrabajoRepository:
             """, (
                 equipo.id_trabajo_grado,
                 equipo.id_usuario,
-                equipo.id_rol_proyecto,
+                equipo.id_rol,
                 equipo.observaciones,
                 equipo.fecha_asignacion,
                 equipo.fecha_finalizacion,

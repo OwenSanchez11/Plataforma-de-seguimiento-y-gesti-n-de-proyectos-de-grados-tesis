@@ -8,10 +8,10 @@ class Trabajo_grado(BaseModel):
     id_carrera: int
     titulo: str
     resumen: Optional[str] = None
-    linea_investigacion: Optional[str] = None
-    estado_tramite: Optional[str] = None
+    linea_investigacion: str
+    estado_tramite: str
     fecha_inicio: Optional[date] = None
     fecha_fin: Optional[date] = None
     fecha_sustentacion: Optional[date] = None
     observaciones_finales: Optional[str] = None
-    estado: Optional[bool] = True
+    estado: bool = True
