@@ -13,7 +13,7 @@ from app.api import rutas_equipo_trabajo
 from app.api import rutas_evaluacion
 from app.api import rutas_modulo
 from app.api import rutas_modulo_rol
-
+from app.api import ruta_login
 
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
@@ -38,6 +38,8 @@ app.add_middleware(
 )
 
 
+
+
 app.include_router(rutas_usuario.router)
 app.include_router(rutas_rol.router)
 app.include_router(rutas_trabajo_grado.router)
@@ -49,3 +51,4 @@ app.include_router(rutas_equipo_trabajo.router)
 app.include_router(rutas_evaluacion.router)
 app.include_router(rutas_modulo.router)
 app.include_router(rutas_modulo_rol.router)
+app.include_router(ruta_login.router)

@@ -50,7 +50,7 @@ class TrabajoGradoRepository:
         except psycopg2.Error as e:
             print("Error al obtener trabajo de grado:", e)
             return None
-
+        
     def crearTrabajoGrado(self, trabajo_grado: Trabajo_grado):
         try:
             conn = self.db.getConnection()

@@ -6,7 +6,7 @@ from app.repositories.avances_repo import AvancesRepository
 
 router = APIRouter(
     prefix="/avances",
-    tags=["Gestión de avances"]
+    tags=["Gestión de avances"],
 )
 
 repo = AvancesRepository()

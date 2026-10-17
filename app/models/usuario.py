@@ -11,5 +11,5 @@ class Usuario(BaseModel):
     apellido: str
     email: str
     documento: str
-    contrasena: str
+    contrasena: Optional[str] = None
     estado: bool = True

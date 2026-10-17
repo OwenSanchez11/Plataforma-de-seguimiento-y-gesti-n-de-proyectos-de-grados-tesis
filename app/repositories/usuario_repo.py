@@ -1,7 +1,7 @@
 import psycopg2
 from app.core.database import Database
 from app.models.usuario import Usuario
-
+from app.core.security import hashear_password
 
 class UsuarioRepository:
 
@@ -55,6 +55,8 @@ class UsuarioRepository:
             conn = self.db.getConnection()
             cursor = conn.cursor()
 
+            contrasena_hash= hashear_password(usuario.contrasena)
+
             query = """
                 INSERT INTO usuario (
                     id_carrera,
@@ -64,7 +66,7 @@ class UsuarioRepository:
                     apellido,
                     email,
                     documento,
-                    contrasena,
+                    contrasena_hash,
                     estado
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -106,6 +108,8 @@ class UsuarioRepository:
         try:
             conn = self.db.getConnection()
             cursor = conn.cursor()
+            
+            nueva_contrasena = (hashear_password(usuario.contrasena) if usuario.contrasena else None)
 
             query = """
                 UPDATE usuario
@@ -117,7 +121,7 @@ class UsuarioRepository:
                     apellido = %s,
                     email = %s,
                     documento = %s,
-                    contrasena = %s,
+                    contrasena = COALESCE(%s, contrasena),
                     estado = %s,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id_user = %s
@@ -134,7 +138,7 @@ class UsuarioRepository:
                     usuario.apellido,
                     usuario.email,
                     usuario.documento,
-                    usuario.contrasena,
+                    nueva_contrasena,
                     usuario.estado,
                     id_user
                 )
