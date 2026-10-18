@@ -8,13 +8,13 @@ class Evaluacion(BaseModel):
     id_evaluacion: Optional[int] = None
 
     id_trabajo_grado: int
+    
+    id_avance: int
 
-    id_usuario: int
+    nota: float
 
-    nota: Optional[float] = None
-
-    veredicto: Optional[str] = None
-
+    veredicto: str
+    
     observaciones: Optional[str] = None
 
     fecha_evaluacion: Optional[date] = None

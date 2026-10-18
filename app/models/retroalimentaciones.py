@@ -6,5 +6,5 @@ class Retroalimentacion(BaseModel):
     id_retroalimentacion: Optional[int] = None
     id_avance: int
     id_usuario: int
-    comentario: str
+    comentario: Optional[str] = None
     estado: Optional[bool] = True

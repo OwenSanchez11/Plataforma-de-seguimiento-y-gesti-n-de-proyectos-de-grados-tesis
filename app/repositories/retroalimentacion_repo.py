@@ -57,20 +57,23 @@ class RetroalimentacionesRepository:
         cursor.execute(
             """
                 SELECT r.id_retroalimentacion,
-                    r.id_usuario AS id_user,
-                    r.comentario,
-                    r.created_at,
-                    a.id_avance,
-                    a.titulo AS avance_titulo,
-                    a.numero_version,
-                    a.fecha_entrega,
-                    a.fecha_limite,
-                    a.dictamen
-                FROM retroalimentaciones r
-                JOIN avances a ON a.id_avance = r.id_avance
-                WHERE a.id_trabajo_grado = %s
-                    AND r.estado = TRUE
-                ORDER BY r.created_at DESC
+                r.comentario,
+                r.created_at,
+                a.id_avance,
+                a.titulo AS avance_titulo,
+                a.numero_version,
+                a.fecha_entrega,
+                a.fecha_limite,
+                a.dictamen,
+                u.id_user,
+                u.nombre,
+                u.apellido 
+            FROM retroalimentaciones r
+            JOIN avances a ON a.id_avance = r.id_avance
+            JOIN usuario u ON u.id_user = r.id_usuario
+            WHERE a.id_trabajo_grado = %s
+                AND r.estado = TRUE
+            ORDER BY r.created_at DESC
             """, (id_trabajo_grado,)
         )
         return cursor.fetchall();

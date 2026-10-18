@@ -77,7 +77,7 @@ class EvaluacionRepository:
             query = """
                 INSERT INTO evaluacion_final (
                     id_trabajo_grado,
-                    id_usuario,
+                    id_avance,
                     nota,
                     veredicto,
                     observaciones,
@@ -100,7 +100,7 @@ class EvaluacionRepository:
                 query,
                 (
                     evaluacion.id_trabajo_grado,
-                    evaluacion.id_usuario,
+                    evaluacion.id_avance,
                     evaluacion.nota,
                     evaluacion.veredicto,
                     evaluacion.observaciones,
@@ -140,7 +140,7 @@ class EvaluacionRepository:
             query = """
                 UPDATE evaluacion_final
                 SET id_trabajo_grado = %s,
-                    id_usuario = %s,
+                    id_avance = %s,
                     nota = %s,
                     veredicto = %s,
                     observaciones = %s,
@@ -152,7 +152,7 @@ class EvaluacionRepository:
 
             cursor.execute(query, (
                 evaluacion.id_trabajo_grado,
-                evaluacion.id_usuario,
+                evaluacion.id_avance,
                 evaluacion.nota,
                 evaluacion.veredicto,
                 evaluacion.observaciones,
