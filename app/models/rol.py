@@ -7,4 +7,4 @@ class Rol(BaseModel):
     id_rol: Optional[int] = None
     rol_nombre: str
     estado: Optional[bool] = True
-    ambito: Literal["SISTEMA", "PROYECTO"]
+    ambito: Optional[Literal["SISTEMA", "PROYECTO"]] = None
