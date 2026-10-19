@@ -16,11 +16,11 @@ class EvaluacionRepository:
 
             query = """
                 SELECT e.*
-                FROM evaluacion_final e 
+                FROM evaluacion_final e
                 LEFT JOIN trabajo_grado t ON e.id_trabajo_grado = t.id_trabajo_grado
-                LEFT JOIN carrera c ON t.id_carrera = c.id_carrera            
+                LEFT JOIN carrera c ON t.id_carrera = c.id_carrera
             """
-            
+
             condiciones = []
             valores = []
 
@@ -28,18 +28,18 @@ class EvaluacionRepository:
             if id_carrera is not None:
                 condiciones.append("c.id_carrera = %s")
                 valores.append(id_carrera)
-                
+
             if id_facultad is not None:
                 condiciones.append("c.id_facultad = %s")
                 valores.append(id_facultad)
-                
+
             if condiciones:
-                query += " WHERE " + " AND ".join(condiciones)                
+                query += " WHERE " + " AND ".join(condiciones)
 
             cursor.execute(query, valores)
             evaluaciones = cursor.fetchall()
             conn.close()
-            
+
             return evaluaciones
 
         except psycopg2.Error as e:
@@ -67,6 +67,41 @@ class EvaluacionRepository:
         except psycopg2.Error as e:
             print("Error al obtener evaluación:", e)
             return None
+
+
+    def obtenerEvaluacionPorTrabajo(self, id_trabajo_grado: int):
+        conn = None
+        cursor = None
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT
+                    ef.id_evaluacion,
+                    ef.nota,
+                    ef.veredicto,
+                    ef.observaciones,
+                    ef.fecha_evaluacion,
+                    a.titulo AS titulo_avance
+                FROM evaluacion_final ef
+                JOIN avances a ON a.id_avance = ef.id_avance
+                WHERE ef.id_trabajo_grado = %s
+                AND ef.estado = TRUE
+                ORDER BY ef.fecha_evaluacion DESC, ef.id_evaluacion DESC
+            """, (id_trabajo_grado,))
+
+            return cursor.fetchall()
+
+        except psycopg2.Error as e:
+            print("Error al obtener evaluaciones del trabajo:", e)
+            return []
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
 
     def crearEvaluacion(self, evaluacion: Evaluacion):
         conn = None

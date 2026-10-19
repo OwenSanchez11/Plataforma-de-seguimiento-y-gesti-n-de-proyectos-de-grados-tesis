@@ -1,5 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from app.core.security import estudiante, solo_roles
+from app.repositories.equipo_trabajo_repo import EquipoTrabajoRepository
 from app.models.evaluacion import Evaluacion
 
 from app.repositories.evaluacion_repo import EvaluacionRepository
@@ -11,12 +13,27 @@ router = APIRouter(
 )
 
 repo = EvaluacionRepository()
+equipo_repo = EquipoTrabajoRepository()
 
 
 @router.get("/")
 def obtener_evaluaciones(id_carrera: int | None = None, id_facultad:int | None=None):
 
     return repo.obtenerEvaluaciones(id_carrera, id_facultad)
+
+@router.get("/mi-trabajo")
+def obtener_mis_evaluaciones(usuario=Depends(solo_roles(estudiante))):
+    id_user = int(usuario["sub"])
+
+    datos = equipo_repo.obtenerTrabajoPorEstudiante(id_user)
+    if datos is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No tienes un trabajo de grado asignado"
+        )
+
+    id_trabajo_grado = datos["trabajo"]["id_trabajo_grado"]
+    return repo.obtenerEvaluacionPorTrabajo(id_trabajo_grado)
 
 
 @router.get("/{id_evaluacion}")
