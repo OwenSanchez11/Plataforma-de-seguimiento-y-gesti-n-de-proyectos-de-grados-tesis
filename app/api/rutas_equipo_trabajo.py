@@ -53,6 +53,9 @@ def obtener_trabajo_docente(id_user: int):
         raise HTTPException(status_code=404, detail="El estudiante no tiene trabajo de grado asignado")
     return resultado
 
+@router.get("/trabajo/{id_trabajo_grado}")
+def equipo_por_trabajo(id_trabajo_grado: int, solo_activos: bool = True):
+    return repo.obtenerEquipoPorTrabajo(id_trabajo_grado, solo_activos)
 
 @router.post("/")
 def crear_equipo_trabajo(equipo: EquipoTrabajo):

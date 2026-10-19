@@ -176,6 +176,51 @@ class EquipoTrabajoRepository:
             cursor.close()
             conn.close()
         
+        
+    def obtenerEquipoPorTrabajo(self, id_trabajo_grado, solo_activos=True):
+        conn = None
+        cursor = None
+
+        try:
+            conn = self.db.getConnection()
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT
+                    et.id_equipo,
+                    et.id_trabajo_grado,
+                    et.id_usuario,
+                    u.id_rol,
+                    et.observaciones,
+                    et.fecha_asignacion,
+                    et.fecha_finalizacion,
+                    et.estado,
+                    u.nombre,
+                    u.apellido,
+                    u.email AS correo,
+                    r.rol_nombre AS rol
+                FROM equipo_trabajo et
+                JOIN usuario u ON u.id_user = et.id_usuario
+                LEFT JOIN rol r ON r.id_rol = u.id_rol
+                WHERE et.id_trabajo_grado = %s
+                AND (NOT %s OR et.estado = TRUE)
+                ORDER BY u.id_rol ASC, et.observaciones ASC
+            """, (id_trabajo_grado, solo_activos))
+
+            return cursor.fetchall()
+
+        except psycopg2.Error as e:
+            print("Error al obtener el equipo del trabajo:", e)
+            return []
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+            
+        
+        
     def obtenerEquipoTrabajoPorId(self, id_equipo):
         conn = None
         cursor = None
