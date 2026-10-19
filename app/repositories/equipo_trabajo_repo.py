@@ -48,16 +48,16 @@ class EquipoTrabajoRepository:
             conn = self.db.getConnection()
             cursor = conn.cursor()
 
-            # Buscar el trabajo de grado del usuario.
+            # Buscar el trabajo de grado del estudiante.
             cursor.execute("""
                 SELECT tg.*
                 FROM trabajo_grado tg
                 JOIN equipo_trabajo et ON et.id_trabajo_grado = tg.id_trabajo_grado
-                JOIN rol r ON r.id_rol = et.id_rol
+                JOIN usuario u ON u.id_user = et.id_usuario
+                JOIN rol r ON r.id_rol = u.id_rol
                 WHERE et.id_usuario = %s
                 AND et.estado = TRUE
-                AND r.ambito = 'PROYECTO'
-                AND r.rol_nombre IN ('Estudiante')
+                AND r.rol_nombre = 'Estudiante'
                 ORDER BY et.fecha_asignacion DESC
                 LIMIT 1
             """, (id_user,))
@@ -74,17 +74,14 @@ class EquipoTrabajoRepository:
                     u.nombre,
                     u.apellido,
                     u.email AS correo,
-                    r.rol_nombre AS rol_proyecto,
+                    r.rol_nombre AS rol,
                     et.fecha_asignacion
                 FROM equipo_trabajo et
-                JOIN usuario u
-                    ON u.id_user = et.id_usuario
-                JOIN rol r
-                    ON r.id_rol = et.id_rol
+                JOIN usuario u ON u.id_user = et.id_usuario
+                JOIN rol r ON r.id_rol = u.id_rol
                 WHERE et.id_trabajo_grado = %s
-                  AND et.estado = TRUE
-                  AND r.ambito = 'PROYECTO'
-                ORDER BY et.id_rol ASC, u.nombre ASC
+                AND et.estado = TRUE
+                ORDER BY u.id_rol ASC, u.nombre ASC
             """, (trabajo["id_trabajo_grado"],))
 
             equipo = cursor.fetchall()
@@ -105,68 +102,75 @@ class EquipoTrabajoRepository:
                 conn.close()
 
 
-    def obtenerTrabajoPorDocente(self, id_user): 
+    def obtenerTrabajoPorDocente(self, id_user):
         conn = self.db.getConnection()
         cursor = conn.cursor()
-        
+
         try:
             # 1) Todos los trabajos donde participa el docente
             cursor.execute(
                 """
-                    SELECT tg.*,
-                        r.rol_nombre AS rol_docente,
-                        c.nombre_carrera AS carrera,
-                        ult.nombre_archivo AS ultimo_avance,
-                        ult.fecha_entrega AS fecha_ultimo_avance,
-                        EXISTS(
-                            SELECT 1
-                            FROM evaluacion_final ev
-                            JOIN avances av ON av.id_avance = ev.id_avance
-                            WHERE av.id_trabajo_grado = tg.id_trabajo_grado
-                                AND ev.estado = TRUE
-                        ) as evaluado
-                    FROM trabajo_grado tg
-                    JOIN equipo_trabajo et ON et.id_trabajo_grado = tg.id_trabajo_grado
-                    LEFT JOIN rol r ON r.id_rol = et.id_rol
-                    LEFT JOIN carrera c ON c.id_carrera = tg.id_carrera
-                    LEFT JOIN LATERAL (
-                        SELECT a.nombre_archivo, a.fecha_entrega
-                        FROM avances a
-                        WHERE a.id_trabajo_grado = tg.id_trabajo_grado
-                            AND a.estado = TRUE
-                        ORDER BY a.fecha_entrega DESC NULLS LAST
-                        LIMIT 1
-                    ) ult ON TRUE
-                    WHERE et.id_usuario = %s
-                        AND et.estado = TRUE
-                        AND r.ambito = 'PROYECTO'
-                """, (id_user,))
+                SELECT tg.*,
+                    r.rol_nombre AS rol_docente,
+                    c.nombre_carrera AS carrera,
+                    ult.nombre_archivo AS ultimo_avance,
+                    ult.fecha_entrega AS fecha_ultimo_avance,
+                    EXISTS (
+                        SELECT 1
+                        FROM evaluacion_final ev
+                        JOIN avances av ON av.id_avance = ev.id_avance
+                        WHERE av.id_trabajo_grado = tg.id_trabajo_grado
+                            AND ev.estado = TRUE
+                    ) AS evaluado
+                FROM trabajo_grado tg
+                JOIN equipo_trabajo et ON et.id_trabajo_grado = tg.id_trabajo_grado
+                JOIN usuario u ON u.id_user = et.id_usuario
+                LEFT JOIN rol r ON r.id_rol = u.id_rol
+                LEFT JOIN carrera c ON c.id_carrera = tg.id_carrera
+                LEFT JOIN LATERAL (
+                    SELECT a.nombre_archivo, a.fecha_entrega
+                    FROM avances a
+                    WHERE a.id_trabajo_grado = tg.id_trabajo_grado
+                    AND a.estado = TRUE
+                    ORDER BY a.fecha_entrega DESC NULLS LAST
+                    LIMIT 1
+                ) ult ON TRUE
+                WHERE et.id_usuario = %s
+                AND et.estado = TRUE
+                """,
+                (id_user,),
+            )
             trabajos = cursor.fetchall()
-            
+
             if not trabajos:
                 return []
-            
-            ##2) equipos de todos los trabajos en una sola consulta
-            
+
+            # 2) Equipos de todos los trabajos en una sola consulta
             ids = [t["id_trabajo_grado"] for t in trabajos]
             cursor.execute(
                 """
-                    SELECT et.id_trabajo_grado,
-                            u.id_user, u.nombre, u.apellido, u.email AS correo,
-                            r.rol_nombre AS rol_proyecto,
-                            et.fecha_asignacion
-                    FROM equipo_trabajo et
-                    JOIN usuario u ON u.id_user = et.id_usuario
-                    LEFT JOIN rol r ON r.id_rol = et.id_rol
-                    WHERE et.id_trabajo_Grado = ANY(%s)
-                        AND et.estado = TRUE
-                        AND r.ambito = 'PROYECTO'
-                """, (ids,)) 
+                SELECT et.id_trabajo_grado,
+                    u.id_user, u.nombre, u.apellido, u.email AS correo,
+                    r.rol_nombre AS rol,
+                    et.fecha_asignacion
+                FROM equipo_trabajo et
+                JOIN usuario u ON u.id_user = et.id_usuario
+                LEFT JOIN rol r ON r.id_rol = u.id_rol
+                WHERE et.id_trabajo_grado = ANY(%s)
+                AND et.estado = TRUE
+                """,
+                (ids,),
+            )
             equipo = cursor.fetchall()
-            
+
+            # Agrupar por trabajo (evita recorrer toda la lista por cada trabajo)
+            equipos_por_trabajo = {}
+            for e in equipo:
+                equipos_por_trabajo.setdefault(e["id_trabajo_grado"], []).append(e)
+
             for t in trabajos:
-                t["equipo"] = [e for e in equipo if e["id_trabajo_grado"] == t["id_trabajo_grado"]]
-                
+                t["equipo"] = equipos_por_trabajo.get(t["id_trabajo_grado"], [])
+
             return trabajos
         finally:
             cursor.close()
@@ -211,14 +215,12 @@ class EquipoTrabajoRepository:
                 INSERT INTO equipo_trabajo (
                     id_trabajo_grado,
                     id_usuario,
-                    id_rol,
                     observaciones,
                     fecha_asignacion,
                     fecha_finalizacion,
                     estado
                 )
                 VALUES (
-                    %s,
                     %s,
                     %s,
                     %s,
@@ -230,7 +232,6 @@ class EquipoTrabajoRepository:
             """, (
                 equipo.id_trabajo_grado,
                 equipo.id_usuario,
-                equipo.id_rol,
                 equipo.observaciones,
                 equipo.fecha_asignacion,
                 equipo.fecha_finalizacion,
@@ -274,9 +275,6 @@ class EquipoTrabajoRepository:
                     id_usuario = (
                         %s, id_usuario
                     ),
-                    id_rol = (
-                        %s, id_rol
-                    ),
                     observaciones = (
                         %s, observaciones
                     ),
@@ -303,7 +301,6 @@ class EquipoTrabajoRepository:
             """, (
                 equipo.id_trabajo_grado,
                 equipo.id_usuario,
-                equipo.id_rol,
                 equipo.observaciones,
                 equipo.fecha_asignacion,
                 equipo.fecha_finalizacion,
