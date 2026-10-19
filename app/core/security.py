@@ -4,7 +4,8 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
+from dotenv import load_dotenv
+load_dotenv()
 
 admin = 1
 coordinador = 2
