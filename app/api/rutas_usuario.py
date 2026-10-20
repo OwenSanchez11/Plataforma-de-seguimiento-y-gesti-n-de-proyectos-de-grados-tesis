@@ -32,7 +32,7 @@ def obtener_usuarios_por_id(id_user: int):
     return usuario
 
 
-@router.post("/", dependencies=[Depends(solo_roles(admin))])
+@router.post("/", dependencies=[Depends(solo_roles(admin, coordinador))])
 def crear_usuario(usuario: Usuario):
     if not usuario.contrasena: 
         raise HTTPException(status_code=400, detail="La contraseña es obligatoria al crear un usuario")

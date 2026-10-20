@@ -5,7 +5,7 @@ from app.repositories.modulo_rol_repo import ModuloRolRepository
 
 
 router = APIRouter(
-    prefix="/modulo-rol",
+    prefix="",
     tags=["Gestión de Módulos por Rol"]
 )
 

@@ -66,7 +66,7 @@ class UsuarioRepository:
                     apellido,
                     email,
                     documento,
-                    contrasena_hash,
+                    contrasena,
                     estado
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -83,7 +83,7 @@ class UsuarioRepository:
                     usuario.apellido,
                     usuario.email,
                     usuario.documento,
-                    usuario.contrasena,
+                    contrasena_hash,
                     usuario.estado
                 )
             )

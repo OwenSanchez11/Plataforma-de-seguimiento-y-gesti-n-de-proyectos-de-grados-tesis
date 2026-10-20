@@ -132,9 +132,17 @@ class ModuloRolRepository:
 
             return actualizado
 
-        except psycopg2.errors.UniqueViolation:
+        except psycopg2.errors.UniqueViolation as e:
+            conn.rollback()
             print("Error al actualizar módulo por rol:", e)
             return None
+        except psycopg2.Error as e:
+            conn.rollback()
+            print("Error al actualizar m?dulo por rol:", e)
+            return None
+        finally:
+            if "conn" in locals():
+                conn.close()
 
     def eliminarModuloRol(self, id_modulo_rol: int):
 
