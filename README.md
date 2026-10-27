@@ -1,423 +1,138 @@
-# Backend del sistema de seguimiento de trabajos de grado
+﻿# Plataforma de seguimiento de trabajos de grado
 
-API REST construida con **FastAPI** para centralizar el seguimiento de trabajos de grado de la universidad. El sistema permite registrar usuarios, roles, trabajos de grado, asignaciones de estudiantes, directores y jurados, ademas de hitos, entregas y retroalimentaciones.
+API REST para gestionar información académica relacionada con trabajos de grado: usuarios y roles, facultades y carreras, equipos, avances, retroalimentaciones y evaluaciones.
 
-## Problema a resolver
+El backend está construido con FastAPI y Python. Se conecta a PostgreSQL mediante `psycopg2` y organiza el acceso a datos en repositorios.
 
-La gestion de tesis y trabajos de grado suele dispersarse entre correos, reuniones informales y documentos aislados. Esta falta de centralizacion dificulta mantener un registro formal, consultar avances, revisar entregas y hacer seguimiento al cronograma de graduacion.
+## Funcionalidades
 
-## Solucion propuesta
+- Inicio de sesión con correo y contraseña, y emisión de tokens JWT.
+- Administración de usuarios, roles, facultades, carreras y módulos.
+- Registro de trabajos de grado y asignación de integrantes a equipos.
+- Registro de avances con metadatos de archivos, fechas, estado y dictamen.
+- Registro y consulta de retroalimentaciones y evaluaciones.
+- Control por rol implementado para las rutas de usuarios y para la consulta de evaluaciones del usuario autenticado.
 
-La plataforma backend organiza el proceso academico mediante:
+## Tecnologías
 
-- Registro de usuarios y roles.
-- Creacion y seguimiento de trabajos de grado.
-- Asignacion de estudiantes, directores y jurados.
-- Definicion de hitos del proyecto.
-- Registro de entregas por version.
-- Retroalimentacion de profesores sobre las entregas.
+- Python, FastAPI, Pydantic y Uvicorn.
+- PostgreSQL y `psycopg2-binary`.
+- JWT (`PyJWT`) y bcrypt para autenticación y contraseñas.
+- `python-dotenv` para cargar la configuración local.
 
-## Tecnologias principales
-
-| Tecnologia | Uso |
-| --- | --- |
-| Python | Lenguaje principal del backend |
-| FastAPI | Framework para construir la API REST |
-| Uvicorn | Servidor ASGI para ejecutar la aplicacion |
-| Pydantic | Validacion y definicion de modelos de datos |
-| PostgreSQL | Base de datos relacional |
-| psycopg2 | Conexion entre Python y PostgreSQL |
-| python-dotenv | Carga de variables de entorno desde `.env` |
-
-## Arquitectura del proyecto
-
-El proyecto usa una arquitectura modular por responsabilidades. Cada carpeta separa una parte de la aplicacion para facilitar mantenimiento, lectura y escalabilidad.
+## Estructura
 
 ```text
-app/
-├── api/           # Endpoints y rutas de la API
-├── core/          # Configuracion central, conexion a base de datos
-├── models/        # Modelos Pydantic para entrada y salida de datos
-├── repositories/  # Consultas SQL y operaciones con la base de datos
-└── main.py        # Punto de entrada de la aplicacion FastAPI
-
-DB/
-├── consulta tablas DB.sql
-├── diccionario_datos2.md
-└── diseño db.pdf
+.
+├── app/
+│   ├── api/           # Rutas HTTP
+│   ├── core/          # Conexión a PostgreSQL y seguridad
+│   ├── models/        # Modelos de entrada y datos
+│   ├── repositories/  # Consultas y operaciones de persistencia
+│   └── main.py        # Aplicación FastAPI y registro de routers
+├── DB/
+│   ├── consulta tablas DB.sql
+│   ├── diccionario_datos2.md
+│   └── diseño db.pdf
+├── requirements.txt
+└── README.md
 ```
 
-## Configuracion
+## Requisitos
 
-Crear un archivo `.env` en la raiz del proyecto tomando como base `.env-ejemplo.txt`:
+- Python 3.10 o posterior (el código usa anotaciones de tipo `X | None`).
+- Una instancia PostgreSQL accesible desde el entorno donde se ejecuta la API. La conexión está configurada con `sslmode=require`.
 
-```env
-DB_HOST=TU_HOST_DE_LA_DATABASE
-DB_NAME=NOMBRE_DE_LA_DATABASE
-DB_USER=USUARIO_DE_LA_DATABASE
-DB_PASSWORD=CONTRASENA_DATABASE
-DB_PORT=TU_PUERTO_DE_LA_DATABASE
+## Configuración y ejecución
+
+1. Crea y activa un entorno virtual:
+
+   ```bash
+   python -m venv .venv
+   ```
+
+   En Windows PowerShell:
+
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+   En macOS o Linux:
+
+   ```bash
+   source .venv/bin/activate
+   ```
+
+2. Instala las dependencias:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Crea un archivo `.env` en la raíz del proyecto. Define las credenciales de una base PostgreSQL y una clave privada para firmar tokens:
+
+   ```env
+   DB_HOST=localhost
+   DB_NAME=trabajos_grado
+   DB_USER=postgres
+   DB_PASSWORD=tu contraseña
+   DB_PORT=5432
+   SECRET_KEY=reemplaza-por-una-clave-aleatoria-larga
+   FRONTEND_URL=http://localhost:5173
+   ```
+
+   `FRONTEND_URL` es opcional; si no se define, el backend usa `http://localhost:5173`. La configuración CORS también permite los orígenes `localhost:5173` y `127.0.0.1:5173`. No publiques el archivo `.env` ni compartas sus secretos.
+
+4. Inicia la API desde la raíz del repositorio:
+
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+La API queda disponible en `http://127.0.0.1:8000`. FastAPI genera la documentación interactiva en:
+
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- ReDoc: `http://127.0.0.1:8000/redoc`
+
+## Rutas disponibles
+
+Las rutas con `{id_...}` reciben el identificador correspondiente. Los endpoints de listado aceptan los parámetros de consulta indicados.
+
+| Recurso | Rutas |
+| --- | --- |
+| Autenticación | `POST /auth/login` |
+| Usuarios | `GET /usuarios/`, `GET /usuarios/{id_user}`, `POST /usuarios/`, `PUT /usuarios/{id_user}`, `DELETE /usuarios/{id_user}` |
+| Roles | `GET /rol/`, `GET /rol/{id_rol}`, `POST /rol/`, `PUT /rol/{id_rol}`, `DELETE /rol/{id_rol}` |
+| Facultades | `GET /facultades/`, `GET /facultades/{id_facultad}`, `POST /facultades/`, `PUT /facultades/{id_facultad}`, `DELETE /facultades/{id_facultad}` |
+| Carreras | `GET /carreras/`, `GET /carreras/{id_carrera}`, `POST /carreras/`, `PUT /carreras/{id_carrera}`, `DELETE /carreras/{id_carrera}` |
+| Trabajos de grado | `GET /trabajo_grado/`, `GET /trabajo_grado/{id_trabajo_grado}`, `POST /trabajo_grado/`, `PUT /trabajo_grado/{id_trabajo_grado}`, `DELETE /trabajo_grado/{id_trabajo_grado}` |
+| Equipos de trabajo | `GET /equipo-trabajo/`, `GET /equipo-trabajo/{id_equipo}`, `GET /equipo-trabajo/estudiante/{id_user}`, `GET /equipo-trabajo/docente/{id_user}`, `GET /equipo-trabajo/trabajo/{id_trabajo_grado}`, `POST /equipo-trabajo/`, `PUT /equipo-trabajo/{id_equipo}`, `DELETE /equipo-trabajo/{id_equipo}` |
+| Avances | `GET /avances/` (opcional: `id_trabajo_grado`), `GET /avances/trabajo/{id_trabajo_grado}`, `GET /avances/{id_avance}`, `POST /avances/`, `PUT /avances/{id_avance}`, `DELETE /avances/{id_avance}` |
+| Retroalimentaciones | `GET /retroalimentaciones/`, `GET /retroalimentaciones/{id_retroalimentacion}`, `GET /retroalimentaciones/trabajo/{id_trabajo_grado}`, `POST /retroalimentaciones/`, `PUT /retroalimentaciones/{id_retroalimentacion}`, `DELETE /retroalimentaciones/{id_retroalimentacion}` |
+| Evaluaciones | `GET /evaluaciones/` (opcionales: `id_carrera`, `id_facultad`), `GET /evaluaciones/mi-trabajo`, `GET /evaluaciones/{id_evaluacion}`, `POST /evaluaciones/`, `PUT /evaluaciones/{id_evaluacion}`, `DELETE /evaluaciones/{id_evaluacion}` |
+| Módulos | `GET /modulos/`, `GET /modulos/{id_modulo}`, `POST /modulos/`, `PUT /modulos/{id_modulo}`, `DELETE /modulos/{id_modulo}` |
+| Módulo por rol | `GET /modulo_rol/`, `GET /modulo_rol/{id_modulo_rol}`, `POST /modulo_rol/`, `PUT /modulo_rol/{id_modulo_rol}`, `DELETE /modulo_rol/{id_modulo_rol}` |
+
+### Autenticación y permisos
+
+Envía `POST /auth/login` con un cuerpo JSON como:
+
+```json
+{
+  "email": "usuario@ejemplo.com",
+  "contrasena": "tu contraseña"
+}
 ```
 
-## Instalacion y ejecucion
+Las rutas de usuarios requieren un token Bearer. Según el rol, permiten consultar, crear, actualizar o eliminar usuarios; el identificador de rol se define en `app/core/security.py` (administrador `1`, coordinador `2`, docente `4`, estudiante `5`). `GET /evaluaciones/mi-trabajo` también requiere token y está restringida al rol estudiante. El token JWT vence después de 60 minutos. Revisa las rutas y dependencias de seguridad antes de exponer la API públicamente: no todos los routers declaran autenticación.
 
-```bash
-python -m venv myenv
-myenv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+## Base de datos
 
-Al iniciar el servidor, la API queda disponible normalmente en:
-
-- API: `http://127.0.0.1:8000/docs`
-
-
-
-## Entidades, modelos, repositorios y endpoints
-
-### Usuario
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `usuario` |
-| Ruta API | `app/api/rutas_usuario.py` |
-| Modelo | `app/models/usuario.py` |
-| Repositorio | `app/repositories/usuario_repo.py` |
-| Clase repositorio | `UsuarioRepository` |
-| Modelos Pydantic | `Usuario`, `UsuarioCrear`, `UsuarioRespuesta`, `ActualizarUsuario` |
-| Campos principales | `id_user`, `username`, `nombre`, `apellido`, `email`, `documento`, `contrasena` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/usuarios/` | Listar usuarios |
-| GET | `/usuarios/{id_user}` | Consultar usuario por ID |
-| POST | `/usuarios/` | Crear usuario |
-| PUT | `/usuarios/{id_user}` | Actualizar usuario |
-| DELETE | `/usuarios/{id_user}` | Eliminar usuario |
-
-### Rol
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `rol` |
-| Ruta API | `app/api/rutas_rol.py` |
-| Modelo | `app/models/rol.py` |
-| Repositorio | `app/repositories/rol_repo.py` |
-| Clase repositorio | `RolRepository` |
-| Modelos Pydantic | `Rol`, `CrearRol`, `ActualizarRol` |
-| Campos principales | `id_rol`, `rol_nombre` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/rol/` | Listar roles |
-| GET | `/rol/{id_rol}` | Consultar rol por ID |
-| POST | `/rol/` | Crear rol |
-| PUT | `/rol/{id_rol}` | Actualizar rol |
-| DELETE | `/rol/{id_rol}` | Eliminar rol |
-
-### Rol usuario
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `rol_usuario` |
-| Ruta API | `app/api/rutas_rol_usuario.py` |
-| Modelo | `app/models/rol_usuario.py` |
-| Repositorio | `app/repositories/rol_usuario_repo.py` |
-| Clase repositorio | `RolUsuarioRepository` |
-| Modelos Pydantic | `RolUsuario`, `CrearRelacionUsuarioRol`, `RolUsuarioRespuesta`, `ActualizarRelacionRolYUsuario` |
-| Campos principales | `id_rol_usuario`, `id_usuario`, `id_rol` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/rol_usuario/` | Listar relaciones usuario-rol |
-| GET | `/rol_usuario/{id_rol_usuario}` | Consultar relacion por ID |
-| POST | `/rol_usuario/` | Crear relacion usuario-rol |
-| PUT | `/rol_usuario/{id_rol_usuario}` | Actualizar rol asignado |
-| DELETE | `/rol_usuario/{id_rol_usuario}` | Eliminar relacion usuario-rol |
-
-### Trabajo de grado
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `trabajo_grado` |
-| Ruta API | `app/api/rutas_trabajo_grado.py` |
-| Modelo | `app/models/trabajo_grado.py` |
-| Repositorio | `app/repositories/trabajo_grado_repo.py` |
-| Clase repositorio | `TrabajoGradoRepository` |
-| Modelos Pydantic | `Trabajo_grado`, `CrearTrabajoGrado`, `ActualizarTrabajoGrado` |
-| Campos principales | `id_trabajo_grado`, `titulo`, `descripcion`, `estado`, `fecha_inicio`, `fecha_estimada_finalizacion` |
-
-| Metodo | Endpoint | Accion |
-| --- | --- | --- |
-| GET | `/trabajo_grado/` | Listar trabajos de grado |
-| GET | `/trabajo_grado/{id_trabajo_grado}` | Consultar trabajo de grado por ID |
-| POST | `/trabajo_grado/` | Crear trabajo de grado |
-| PUT | `/trabajo_grado/{id_trabajo_grado}` | Actualizar trabajo de grado |
-| DELETE | `/trabajo_grado/{id_trabajo_grado}` | Eliminar trabajo de grado |
-
-
-### Facultad
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `facultad` |
-| Ruta API | `app/api/rutas_facultad.py` |
-| Modelo | `app/models/facultad.py` |
-| Repositorio | `app/repositories/facultad_repo.py` |
-| Clase repositorio | `FacultadRepository` |
-| Campos principales | `id_facultad`, `nombre_facultad`, `codigo_facultad` |
-
-| Método | Endpoint | Acción |
-| --- | --- | --- |
-| GET | `/facultad/` | Listar facultades |
-| GET | `/facultad/{id_facultad}` | Consultar facultad por ID |
-| POST | `/facultad/` | Crear facultad |
-| PUT | `/facultad/{id_facultad}` | Actualizar facultad |
-| DELETE | `/facultad/{id_facultad}` | Eliminar facultad |
-
-
-### Carrera
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `carrera` |
-| Ruta API | `app/api/rutas_carrera.py` |
-| Modelo | `app/models/carrera.py` |
-| Repositorio | `app/repositories/carrera_repo.py` |
-| Clase repositorio | `CarreraRepository` |
-| Campos principales | `id_carrera`, `id_facultad`, `nombre_carrera`, `codigo_carrera` |
-
-| Método | Endpoint | Acción |
-| --- | --- | --- |
-| GET | `/carrera/` | Listar carreras |
-| GET | `/carrera/{id_carrera}` | Consultar carrera por ID |
-| POST | `/carrera/` | Crear carrera |
-| PUT | `/carrera/{id_carrera}` | Actualizar carrera |
-| DELETE | `/carrera/{id_carrera}` | Eliminar carrera |
-
-
-### Asignación
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `asignacion` |
-| Ruta API | `app/api/rutas_asignacion.py` |
-| Modelo | `app/models/asignacion.py` |
-| Repositorio | `app/repositories/asignacion_repo.py` |
-| Clase repositorio | `AsignacionRepository` |
-| Campos principales | `id_asignacion`, `id_trabajo_grado`, `id_usuario`, `id_rol`, `fecha_asignacion`, `estado` |
-
-| Método | Endpoint | Acción |
-| --- | --- | --- |
-| GET | `/asignacion/` | Listar asignaciones |
-| GET | `/asignacion/{id_asignacion}` | Consultar asignación por ID |
-| POST | `/asignacion/` | Crear asignación |
-| PUT | `/asignacion/{id_asignacion}` | Actualizar asignación |
-| DELETE | `/asignacion/{id_asignacion}` | Eliminar asignación |
-
-
-### Avances
-
-| Elemento | Detalle |
-| --- | --- |
-| Entidad / tabla | `avances` |
-| Ruta API | `app/api/rutas_avances.py` |
-| Modelo | `app/models/avances.py` |
-| Repositorio | `app/repositories/avances_repo.py` |
-| Clase repositorio | `AvancesRepository` |
-| Campos principales | `id_avance`, `id_trabajo_grado`, `titulo`, `descripcion`, `fecha_inicio`, `fecha_limite`, `estado` |
-
-| Método | Endpoint | Acción |
-| --- | --- | --- |
-| GET | `/avances/` | Listar avances |
-| GET | `/avances/{id_avance}` | Consultar avance por ID |
-| POST | `/avances/` | Crear avance |
-| PUT | `/avances/{id_avance}` | Actualizar avance |
-| DELETE | `/avances/{id_avance}` | Eliminar avance |
-
-
-
-## Diagrama entidad-relacion
-
-```mermaid
-erDiagram
-
-    FACULTAD {
-        int id_facultad PK
-        string nombre_facultad
-        string codigo_facultad
-    }
-
-    CARRERA {
-        int id_carrera PK
-        int id_facultad FK
-        string nombre_carrera
-        string codigo_carrera
-    }
-
-    USUARIO {
-        int id_user PK
-        int id_carrera FK "Opcional / Nullable"
-        string username UK
-        string nombre
-        string apellido
-        string email UK
-        string documento UK
-        string contraseña
-    }
-
-    ROL {
-        int id_rol PK
-        string rol_nombre
-    }
-
-    ROL_USUARIO {
-        int id_rol_usuario PK
-        int id_usuario FK
-        int id_rol FK
-    }
-
-    MODULOS {
-        int id_modulo PK
-        string nombre_modulo
-        boolean estado
-    }
-
-    PERMISOS {
-        int id_permiso PK
-        string nombre_permiso
-    }
-
-    MODULO_ROL {
-        int id_modulo_rol PK
-        int id_rol FK
-        int id_modulo FK
-        int id_permiso FK
-    }
-
-    TRABAJO_GRADO {
-        int id_trabajo_grado PK
-        int id_carrera FK
-        string titulo
-        text resumen
-        string linea_investigacion
-        date fecha_inicio
-        date fecha_fin
-        string estado
-        date fecha_sustentacion
-        text observaciones_finales
-    }
-
-    ASIGNACION {
-        int id_asignacion PK
-        int id_trabajo_grado FK
-        int id_usuario FK
-        int id_rol FK
-        date fecha_asignacion
-        boolean estado
-    }
-
-    AVANCES {
-        int id_avance PK
-        int id_trabajo_grado FK
-        string titulo
-        text descripcion
-        date fecha_inicio
-        date fecha_limite
-        string estado
-    }
-
-    ENTREGAS {
-        int id_entrega PK
-        int id_hito FK
-        int numero_version
-        string nombre_archivo
-        string ruta_archivo
-        int tamano_bytes
-        text comentarios
-        string estado
-        date fecha_entrega
-    }
-
-    RETROALIMENTACIONES {
-        int id_retroalimentacion PK
-        int id_usuario FK
-        int id_entrega FK
-        text comentario
-        string estado
-        date fecha_creacion
-    }
-
-    EVALUACION_FINAL {
-        int id_evaluacion PK
-        int id_trabajo_grado FK
-        int id_usuario FK
-        decimal nota
-        string veredicto
-        text observaciones
-        date fecha_evaluacion
-    }
-
-    %% --- RELACIONES ---
-
-    FACULTAD ||--|{ CARRERA : "ofrece"
-    CARRERA ||--o{ USUARIO : "pertenece"
-    CARRERA ||--|{ TRABAJO_GRADO : "pertenece"
-
-    USUARIO ||--|{ ROL_USUARIO : "posee"
-    ROL ||--|{ ROL_USUARIO : "asignado_a"
-
-    ROL ||--|{ MODULO_ROL : "tiene"
-    MODULOS ||--|{ MODULO_ROL : "contiene"
-    PERMISOS ||--|{ MODULO_ROL : "otorga"
-
-    TRABAJO_GRADO ||--|{ ASIGNACION : "tiene"
-    USUARIO ||--|{ ASIGNACION : "participa_en"
-    ROL ||--|{ ASIGNACION : "rol_en"
-
-    TRABAJO_GRADO ||--|{ AVANCES : "planifica"
-    AVANCES ||--|{ ENTREGAS : "recibe"
-
-    ENTREGAS ||--o{ RETROALIMENTACIONES : "genera"
-    USUARIO ||--|{ RETROALIMENTACIONES : "realiza"
-
-    TRABAJO_GRADO ||--o{ EVALUACION_FINAL : "recibe"
-    USUARIO ||--|{ EVALUACION_FINAL : "evalua"
-```
-
-
-## Flujo general del sistema
-Flujo general del sistema
-
-1. Se registra una facultad en `/facultad/` y sus carreras asociadas en  `/carrera/ `.
-
-2. Se registra un usuario en  `/usuario/ `.
-
-3. Se crea un rol en  `/rol/ `.
-
-4. Se asigna el rol al usuario en  `/rol_usuario/ `.
-
-5. Se definen módulos en  `/modulos/ `, permisos en  `/permisos/ ` y se vinculan en  `/modulo_rol/ `.
-
-6. Se registra un trabajo de grado en  `/trabajo_grado/ `.
-
-7. Se asignan estudiantes, tutores y jurados al trabajo de grado en  `/asignacion/ `.
-
-8. Se crean avances (avances) asociados al trabajo de grado en  `/avances/ `.
-
-9. Los estudiantes registran entregas para cada hito en  `/entregas/ `.
-
-10. Los docentes/tutores registran retroalimentaciones sobre las entregas en  `/retroalimentaciones/ `.
-
-11. Los jurados registran la nota final y veredicto en  `/evaluacion_final/ `.
+La aplicación lee `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` y `DB_PORT` desde el entorno al abrir una conexión. El esquema y el diccionario disponibles en `DB/` sirven como referencia del proyecto; verifica que la base configurada tenga las tablas y columnas que esperan los repositorios de `app/repositories/` antes de iniciar operaciones.
 
 ## Autores
 
 - Owen Sanchez
-- Jair Joven
 - Jenifer Camacho
 
-## Institucion
-
-Corporacion Universitaria Latinoamericana - CUL
+Corporación Universitaria Latinoamericana (CUL).
