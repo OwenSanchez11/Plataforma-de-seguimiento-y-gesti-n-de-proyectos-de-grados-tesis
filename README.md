@@ -31,9 +31,7 @@ El backend está construido con FastAPI y Python. Se conecta a PostgreSQL median
 │   ├── repositories/  # Consultas y operaciones de persistencia
 │   └── main.py        # Aplicación FastAPI y registro de routers
 ├── DB/
-│   ├── consulta tablas DB.sql
-│   ├── diccionario_datos2.md
-│   └── diseño db.pdf
+│   └── DB_final.pdf      # Diagrama del modelo de datos
 ├── requirements.txt
 └── README.md
 ```
@@ -128,7 +126,146 @@ Las rutas de usuarios requieren un token Bearer. Según el rol, permiten consult
 
 ## Base de datos
 
-La aplicación lee `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` y `DB_PORT` desde el entorno al abrir una conexión. El esquema y el diccionario disponibles en `DB/` sirven como referencia del proyecto; verifica que la base configurada tenga las tablas y columnas que esperan los repositorios de `app/repositories/` antes de iniciar operaciones.
+El siguiente diagrama ER está basado en las entidades y relaciones del archivo [`DB/DB_final.pdf`](DB/DB_final.pdf):
+
+```mermaid
+erDiagram
+    FACULTAD {
+        int id_facultad PK
+        string nombre_facultad
+        string codigo_facultad
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+    CARRERA {
+        int id_carrera PK
+        int id_facultad FK
+        string nombre_carrera
+        string codigo_carrera
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+    USUARIO {
+        int id_user PK
+        int id_carrera FK
+        int id_rol FK
+        string username
+        string nombre
+        string apellido
+        string email
+        string documento
+        string contrasena
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+    ROL {
+        int id_rol PK
+        string rol_nombre
+        boolean estado
+        string ambito
+        datetime created_at
+        datetime updated_at
+    }
+    MODULOS {
+        int id_modulo PK
+        string nombre_modulo
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+    MODULO_ROL {
+        int id_modulo_rol PK
+        int id_rol FK
+        int id_modulo FK
+        boolean puede_leer
+        boolean puede_crear
+        boolean puede_editar
+        boolean puede_eliminar
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+    TRABAJO_GRADO {
+        int id_trabajo_grado PK
+        int id_carrera FK
+        string titulo
+        string resumen
+        string linea_investigacion
+        string estado_tramite
+        date fecha_inicio
+        date fecha_fin
+        date fecha_sustentacion
+        string observaciones_finales
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+    EQUIPO_TRABAJO {
+        int id_equipo PK
+        int id_trabajo_grado FK
+        int id_usuario FK
+        string observaciones
+        date fecha_asignacion
+        date fecha_finalizacion
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+    AVANCES {
+        int id_avance PK
+        int id_trabajo_grado FK
+        int subido_por FK
+        string titulo
+        string descripcion
+        int numero_version
+        string nombre_archivo
+        string ruta_archivo
+        int tamano_bytes
+        datetime created_at
+        datetime updated_at
+    }
+    RETROALIMENTACIONES {
+        int id_retroalimentacion PK
+        int id_avance FK
+        int id_usuario FK
+        string comentario
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+    EVALUACION_FINAL {
+        int id_evaluacion PK
+        int id_trabajo_grado FK
+        int id_avance FK
+        float nota
+        string veredicto
+        string observaciones
+        date fecha_evaluacion
+        boolean estado
+        datetime created_at
+        datetime updated_at
+    }
+
+    FACULTAD ||--o{ CARRERA : ofrece
+    CARRERA ||--o{ USUARIO : agrupa
+    ROL ||--o{ USUARIO : asigna
+    CARRERA ||--o{ TRABAJO_GRADO : contiene
+    TRABAJO_GRADO ||--o{ EQUIPO_TRABAJO : conforma
+    USUARIO ||--o{ EQUIPO_TRABAJO : participa
+    TRABAJO_GRADO ||--o{ AVANCES : registra
+    USUARIO ||--o{ AVANCES : sube
+    AVANCES ||--o{ RETROALIMENTACIONES : recibe
+    USUARIO ||--o{ RETROALIMENTACIONES : escribe
+    TRABAJO_GRADO ||--o{ EVALUACION_FINAL : obtiene
+    AVANCES ||--o{ EVALUACION_FINAL : evalua
+    ROL ||--o{ MODULO_ROL : tiene
+    MODULOS ||--o{ MODULO_ROL : habilita
+```
+
+La aplicación lee `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` y `DB_PORT` desde el entorno al abrir una conexión. Verifica que la base configurada tenga las tablas y columnas que esperan los repositorios de `app/repositories/` antes de iniciar operaciones.
 
 ## Autores
 
