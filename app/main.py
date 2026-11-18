@@ -15,7 +15,7 @@ from app.api import rutas_modulo
 from app.api import rutas_modulo_rol
 from app.api import ruta_login
 
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173").strip().rstrip("/")
 
 app = FastAPI(
     title="Backend sistema de seguimiento de trabajos de grados",
@@ -29,6 +29,7 @@ origins = [
     "https://localhost",
     "capacitor://localhost",
     "http://localhost",
+    "https://gradostrackcul.netlify.app",
     frontend_url,
 ]
 
