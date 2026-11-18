@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.core.security import admin, coordinador, solo_roles
 
 from app.models.equipo_trabajo import (
     EquipoTrabajo
@@ -57,12 +59,12 @@ def obtener_trabajo_docente(id_user: int):
 def equipo_por_trabajo(id_trabajo_grado: int, solo_activos: bool = True):
     return repo.obtenerEquipoPorTrabajo(id_trabajo_grado, solo_activos)
 
-@router.post("/")
+@router.post("/", dependencies=[Depends(solo_roles(admin, coordinador))])
 def crear_equipo_trabajo(equipo: EquipoTrabajo):
     return repo.crearEquipoTrabajo(equipo)
 
 
-@router.put("/{id_equipo}")
+@router.put("/{id_equipo}", dependencies=[Depends(solo_roles(admin, coordinador))])
 def actualizar_equipo_trabajo(
     id_equipo: int,
     equipo: EquipoTrabajo
@@ -84,7 +86,7 @@ def actualizar_equipo_trabajo(
     }
 
 
-@router.delete("/{id_equipo}")
+@router.delete("/{id_equipo}", dependencies=[Depends(solo_roles(admin, coordinador))])
 def eliminar_equipo_trabajo(
     id_equipo: int
 ):

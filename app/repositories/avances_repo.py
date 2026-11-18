@@ -134,7 +134,8 @@ class AvancesRepository:
     def actualizarAvances(
         self,
         id_avance: int,
-        avance: Avances
+        avance: Avances,
+        verificar_archivo: bool = False,
     ):
 
         try:
@@ -144,21 +145,22 @@ class AvancesRepository:
             query = """
                 UPDATE avances
                 SET
-                    id_trabajo_grado = %s,
+                    id_trabajo_grado = CASE WHEN ruta_archivo LIKE 'entregables/%%' THEN id_trabajo_grado ELSE %s END,
                     titulo = %s,
-                    subido_por = %s,
+                    subido_por = CASE WHEN ruta_archivo LIKE 'entregables/%%' THEN subido_por ELSE %s END,
                     descripcion = %s,
-                    numero_version = %s,
-                    nombre_archivo = %s,
-                    ruta_archivo = %s,
-                    tamano_bytes = %s,
+                    numero_version = CASE WHEN ruta_archivo LIKE 'entregables/%%' THEN numero_version ELSE %s END,
+                    nombre_archivo = CASE WHEN ruta_archivo LIKE 'entregables/%%' THEN nombre_archivo ELSE %s END,
+                    ruta_archivo = CASE WHEN ruta_archivo LIKE 'entregables/%%' THEN ruta_archivo ELSE %s END,
+                    tamano_bytes = CASE WHEN ruta_archivo LIKE 'entregables/%%' THEN tamano_bytes ELSE %s END,
                     fecha_inicio = %s,
-                    fecha_entrega = %s,
+                    fecha_entrega = CASE WHEN ruta_archivo LIKE 'entregables/%%' THEN fecha_entrega ELSE %s END,
                     fecha_limite = %s,
                     estado = %s,
                     updated_at = CURRENT_TIMESTAMP,
                     dictamen = %s
                 WHERE id_avance = %s
+                  AND (%s IS FALSE OR ruta_archivo IS NOT DISTINCT FROM %s)
                 RETURNING id_avance;
             """
 
@@ -178,7 +180,9 @@ class AvancesRepository:
                     avance.fecha_limite,
                     avance.estado,
                     avance.dictamen,
-                    id_avance
+                    id_avance,
+                    verificar_archivo,
+                    avance.ruta_archivo
                 )
             )
 

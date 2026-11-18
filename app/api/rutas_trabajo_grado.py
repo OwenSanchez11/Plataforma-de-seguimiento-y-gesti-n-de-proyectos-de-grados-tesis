@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.core.security import admin, coordinador, solo_roles
 
 from app.models.trabajo_grado import Trabajo_grado
 from app.repositories.trabajo_grado_repo import TrabajoGradoRepository
@@ -39,7 +41,7 @@ def crear_trabajo_grado(trabajo_grado: Trabajo_grado):
     return repo.crearTrabajoGrado(trabajo_grado)
 
 
-@router.put("/{id_trabajo_grado}")
+@router.put("/{id_trabajo_grado}", dependencies=[Depends(solo_roles(admin, coordinador))])
 def actualizar_trabajo_grado(
     id_trabajo_grado: int,
     trabajo_grado: Trabajo_grado

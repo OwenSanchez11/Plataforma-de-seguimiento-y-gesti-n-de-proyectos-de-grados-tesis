@@ -1,5 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from contextlib import closing
 
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.core.security import admin, coordinador, docente, solo_roles
+
+from app.api.rutas_archivos_avances import obtener_avance
+from app.core.database import Database
 from app.models.avances import Avances
 from app.repositories.avances_repo import AvancesRepository
 
@@ -46,8 +52,19 @@ def crear_avance(avance: Avances):
 
 
 @router.put("/{id_avance}")
-def actualizar_avance(id_avance: int, avance: Avances):
-    actualizado = repo.actualizarAvances(id_avance, avance)
+def actualizar_avance(
+    id_avance: int, avance: Avances, sesion: dict = Depends(solo_roles(admin, coordinador, docente))
+):
+    es_docente = sesion["id_rol"] == docente
+    if es_docente:
+        with closing(Database().getConnection()) as conexion, conexion.cursor() as cursor:
+            actual = obtener_avance(cursor, id_avance, sesion)
+        if avance.id_trabajo_grado != actual["id_trabajo_grado"]:
+            raise HTTPException(403, "El docente no puede reasignar un avance.")
+
+    actualizado = repo.actualizarAvances(id_avance, avance, verificar_archivo=es_docente)
+    if not actualizado and es_docente:
+        raise HTTPException(409, "La entrega cambió. Actualiza la lista antes de guardar el dictamen.")
 
     if not actualizado:
         raise HTTPException(status_code=404, detail="Avance no encontrado")
@@ -55,7 +72,7 @@ def actualizar_avance(id_avance: int, avance: Avances):
     return {"mensaje": "Avance actualizado exitosamente"}
 
 
-@router.delete("/{id_avance}")
+@router.delete("/{id_avance}", dependencies=[Depends(solo_roles(admin, coordinador))])
 def eliminar_avance(id_avance: int):
     eliminado = repo.eliminarAvances(id_avance)
 
